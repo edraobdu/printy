@@ -11,7 +11,7 @@ with open(readme_path) as fh:
 setup(
     name="printy",
     version=__version__,
-    url="https://github.com/edraobdu/color_print",
+    url="https://github.com/edraobdu/printy",
     author="Edgardo Obregón",
     author_email="edraobdu@gmail.com",
     description="Colorize the print statement by global or inline flags",

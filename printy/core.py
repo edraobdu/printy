@@ -223,15 +223,3 @@ class Printy:
     def format(self, value, flags=None, default=None):
         """ Prints out the value """
         print(self.get_formatted_text(value, flags, default))
-
-    def help(self):
-        """ Prints out a description of the flags and methods available """
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        help_txt = os.path.join(base_dir, 'help.txt')
-        with open(help_txt) as h:
-            text = h.read()
-            h.seek(0)
-        return self.get_formatted_text(text)
-
-
-
