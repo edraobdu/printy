@@ -1,6 +1,6 @@
 import unittest
 from printy.exceptions import InvalidFlag
-from printy.core import Printy
+from printy.core import (Printy, LINUX, OSX, WINDOWS)
 
 # If you find yourself struggling with import errors like
 # 'ImportError: attempted relative import with no known parent package'
@@ -15,6 +15,7 @@ class TestGlobalColorPrint(unittest.TestCase):
         self.sample_text = "Some Text To Print Out"
         self.printy_instance = Printy()
         self.printy = self.printy_instance.format
+        self.raw_text = self.printy_instance.get_formatted_text
 
     def test_single_invalid_flag(self):
         """
@@ -41,7 +42,7 @@ class TestGlobalColorPrint(unittest.TestCase):
         """
         Tests that the returned text is always ended with the closing tag
         """
-        result = self.printy_instance.get_formatted_text(self.sample_text, 'r')
+        result = self.raw_text(self.sample_text, 'r')
         closing_tag = result[-4:]
         self.assertEqual(len(closing_tag), 4)
         self.assertEqual(closing_tag, Printy._get_end_of_line())
@@ -50,7 +51,7 @@ class TestGlobalColorPrint(unittest.TestCase):
         """
         Tests that passing no flag parameter will return a default value
         """
-        result = self.printy_instance.get_formatted_text(self.sample_text)
+        result = self.raw_text(self.sample_text)
         self.assertEqual(result, self.sample_text)
 
     def test_empty_flag(self):
@@ -58,7 +59,7 @@ class TestGlobalColorPrint(unittest.TestCase):
         Test that passing and empty string as a flag still returns the
         default value
         """
-        result = self.printy_instance.get_formatted_text(self.sample_text, '')
+        result = self.raw_text(self.sample_text, '')
         self.assertEqual(result, self.sample_text)
 
     def test_flags_with_spaces_in_between(self):
@@ -69,11 +70,26 @@ class TestGlobalColorPrint(unittest.TestCase):
         desired_flags = 'yBH'
         flags_with_one_space = 'yB H'
         flags_with_multiple_spaces = 'y B H'
-        result_one = self.printy_instance.get_formatted_text(self.sample_text, desired_flags)
-        result_two = self.printy_instance.get_formatted_text(self.sample_text, flags_with_one_space)
-        result_three = self.printy_instance.get_formatted_text(self.sample_text, flags_with_multiple_spaces)
+        result_one = self.raw_text(self.sample_text, desired_flags)
+        result_two = self.raw_text(self.sample_text, flags_with_one_space)
+        result_three = self.raw_text(self.sample_text, flags_with_multiple_spaces)
 
         self.assertTrue(result_one == result_two == result_three)
+
+    def test_no_linux_platform_return_cleaned_value(self):
+        """
+        Tests that if printy is used on platforms other than Linux it still
+        returns the cleaned value
+        """
+        flags = 'rBH'
+        # Changes platform to Windows
+        self.printy_instance.platform = WINDOWS
+        result_one = self.raw_text(self.sample_text, flags)
+        # Changes platform to Darwin
+        self.printy_instance.platform = OSX
+        result_two = self.raw_text(self.sample_text, flags)
+
+        self.assertTrue(result_one == result_two == self.sample_text)
 
 
 class TestInlineColorPrint(unittest.TestCase):
@@ -82,6 +98,7 @@ class TestInlineColorPrint(unittest.TestCase):
     def setUp(self):
         self.printy_instance = Printy()
         self.printy = self.printy_instance.format
+        self.raw_text = self.printy_instance.get_formatted_text
 
     def test_inline_format_with_global_flags(self):
         """
@@ -91,8 +108,8 @@ class TestInlineColorPrint(unittest.TestCase):
         inline_formatted = "[y]Hey you@"
         no_format = 'Hey you'
         global_flags = 'rB'
-        result_one = self.printy_instance.get_formatted_text(inline_formatted, global_flags)
-        result_two = self.printy_instance.get_formatted_text(no_format, global_flags)
+        result_one = self.raw_text(inline_formatted, global_flags)
+        result_two = self.raw_text(no_format, global_flags)
 
         self.assertEqual(result_one, result_two)
 
@@ -101,8 +118,8 @@ class TestInlineColorPrint(unittest.TestCase):
         Tests that passing an inline formatted text without the ending
         formatting character still returns the formatted text
         """
-        result_one = self.printy_instance.get_formatted_text('[y]Hey you')
-        result_two = self.printy_instance.get_formatted_text('[y]Hey you@')
+        result_one = self.raw_text('[y]Hey you')
+        result_two = self.raw_text('[y]Hey you@')
 
         self.assertEqual(result_one, result_two)
 
@@ -114,11 +131,11 @@ class TestInlineColorPrint(unittest.TestCase):
         inline_text_two = '[bH]Some text \@@'
         global_text_two = 'Some text @', 'bH'
 
-        inline_result_one = self.printy_instance.get_formatted_text(inline_text_one)
-        global_result_one = self.printy_instance.get_formatted_text(global_text_one[0], global_text_one[1])
+        inline_result_one = self.raw_text(inline_text_one)
+        global_result_one = self.raw_text(global_text_one[0], global_text_one[1])
 
-        inline_result_two = self.printy_instance.get_formatted_text(inline_text_two)
-        global_result_two = self.printy_instance.get_formatted_text(global_text_two[0], global_text_two[1])
+        inline_result_two = self.raw_text(inline_text_two)
+        global_result_two = self.raw_text(global_text_two[0], global_text_two[1])
 
         self.assertEqual(inline_result_one, global_result_one)
         self.assertEqual(inline_result_two, global_result_two)
@@ -129,13 +146,29 @@ class TestInlineColorPrint(unittest.TestCase):
         section_one = "Some"
         section_two = ' '
         section_three = 'text'
-        global_format_one = self.printy_instance.get_formatted_text(section_one, 'rB')
-        global_format_two = self.printy_instance.get_formatted_text(section_two)
-        global_format_three = self.printy_instance.get_formatted_text(section_three, 'y')
+        global_format_one = self.raw_text(section_one, 'rB')
+        global_format_two = self.raw_text(section_two)
+        global_format_three = self.raw_text(section_three, 'y')
         joined_global_format = global_format_one + global_format_two + global_format_three
 
         inline_text = '[rB]Some@ [y]text@'
-        inline_format = self.printy_instance.get_formatted_text(inline_text)
+        inline_format = self.raw_text(inline_text)
 
         self.assertEqual(inline_format, joined_global_format)
+
+    def test_no_linux_platform_return_cleaned_value(self):
+        """
+        Tests that if printy is used on platforms other than Linux it still
+        returns the cleaned value
+        """
+        sample_text = "[rBH]Sample@ [y]Text@"
+        sample_text_expected = "Sample Text"
+        # Changes platform to Windows
+        self.printy_instance.platform = WINDOWS
+        result_one = self.raw_text(sample_text)
+        # Changes platform to Darwin
+        self.printy_instance.platform = OSX
+        result_two = self.raw_text(sample_text)
+
+        self.assertTrue(result_one == result_two == sample_text_expected)
 

@@ -4,6 +4,10 @@ import platform
 from .exceptions import InvalidFlag
 
 
+LINUX = 'Linux'
+WINDOWS = 'Windows'
+OSX = 'Darwin'
+
 class Printy:
     """
     Applies a format to the output of the print statement according
@@ -221,29 +225,35 @@ class Printy:
 
         If 'flag's is passed, 'default' will be omitted.
         """
-        if flags:
-            flags_values = self.get_flag_values(flags)
-            value = self._get_cleaned_text(value)
-            text = "%s%s%s" % (
-                self._join_flags(flags_values),
-                value,
-                self._get_end_of_line()
-            )
+        # As of right now, Windows PowerShell and Command line does not apply
+        # the format to the text without a specific configuration. So we'll
+        # return the cleaned text for Windows and MacOS operative systems
+        if self.platform != LINUX:
+            text = self._get_cleaned_text(value)
         else:
-            tuple_text = self._get_inline_format_as_tuple(value)
-            text = ''
-            for section in tuple_text:
-                section_text = self._replace_escaped(section[0])
-                section_flags = section[1] or default
-                if section_flags:
-                    flags_values = self.get_flag_values(section_flags)
-                    text += "%s%s%s" % (
-                        self._join_flags(flags_values),
-                        section_text,
-                        self._get_end_of_line()
-                    )
-                else:
-                    text += section_text
+            if flags:
+                flags_values = self.get_flag_values(flags)
+                value = self._get_cleaned_text(value)
+                text = "%s%s%s" % (
+                    self._join_flags(flags_values),
+                    value,
+                    self._get_end_of_line()
+                )
+            else:
+                tuple_text = self._get_inline_format_as_tuple(value)
+                text = ''
+                for section in tuple_text:
+                    section_text = self._replace_escaped(section[0])
+                    section_flags = section[1] or default
+                    if section_flags:
+                        flags_values = self.get_flag_values(section_flags)
+                        text += "%s%s%s" % (
+                            self._join_flags(flags_values),
+                            section_text,
+                            self._get_end_of_line()
+                        )
+                    else:
+                        text += section_text
         return text
 
     def format(self, value, flags=None, default=None):
