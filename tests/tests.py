@@ -44,7 +44,7 @@ class TestGlobalColorPrint(unittest.TestCase):
         result = self.printy_instance.get_formatted_text(self.sample_text, 'r')
         closing_tag = result[-4:]
         self.assertEqual(len(closing_tag), 4)
-        self.assertEqual(closing_tag, Printy.end_of_line)
+        self.assertEqual(closing_tag, Printy._get_end_of_line())
 
     def test_no_flag_parameter_passed(self):
         """

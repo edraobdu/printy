@@ -30,25 +30,42 @@ class Printy:
         self.flags = self._get_flags()
         self.platform = platform.system()
 
-    #### COLORS
-    GREY = 'g', '\033[90m'
-    RED = 'r', '\033[31m'
-    GREEN = 'n', '\033[92m'
-    YELLOW = 'y', '\033[93m'
-    BLUE = 'b', '\033[34m'
-    MAGENTA = 'm', '\033[95m'
-    CYAN = 'c', '\033[96m'
-    BLACK = 'k', '\033[97m'
-    PREDEFINED = 'p', '\033[98m'
+    escape_ansi_code = '\x1b['
+    escape_ansi_end = 'm'
+
+    #### COLORS (FG CODES)
+    BLACK = 'k', '30'
+    RED = 'r', '31'
+    GREEN = 'n', '32'
+    YELLOW = 'y', '33'
+    BLUE = 'b', '34'
+    MAGENTA = 'm', '35'
+    CYAN = 'c', '36'
+    WHITE = 'w', '37'
+    GREY = 'g', '90'
+
+    DEFAULT = 'p', '10'
 
     #### FORMATS
-    BOLD = 'B', '\033[1m'
-    ITALIC = 'I', '\033[3m'
-    UNDERLINE = 'U', '\033[4m'
-    HIGHLIGHT = 'H', '\033[7m'
+    BOLD = 'B', '1'
+    DIM = 'D', '2'
+    ITALIC = 'I', '3'
+    UNDERLINE = 'U', '4'
+    HIGHLIGHT = 'H', '7'
+    STRIKE = 'S', '9'
 
     #### END OF LINE
-    end_of_line = '\033[0m'
+    reset = '0'
+
+    @classmethod
+    def _get_end_of_line(cls):
+        """ Defined method to get the 'reset' code """
+        return cls.escape_ansi_code + cls.reset + cls.escape_ansi_end
+
+    @classmethod
+    def _join_flags(cls, flags):
+        """ Given a set of flags, returned the final ansi code to add to the text"""
+        return "%s%s%s" % (cls.escape_ansi_code, ';'.join(flags), cls.escape_ansi_end)
 
     @classmethod
     def _get_flags(cls):
@@ -56,7 +73,8 @@ class Printy:
         returns a dictionary where the flag is the key and the attribute
         name is the value
         """
-        return {y[0]: x for x, y in vars(cls).items() if x.isupper()}
+        return {y[0]: x for x, y in vars(cls).items()
+                if x.isupper() and isinstance(y, tuple) and len(y[0]) == 1}
 
     def get_flag_values(self, flags):
         """ returns a list of the escaped values for the flag labels """
@@ -206,7 +224,11 @@ class Printy:
         if flags:
             flags_values = self.get_flag_values(flags)
             value = self._get_cleaned_text(value)
-            text = f"{''.join(flags_values)}{value}{self.end_of_line}"
+            text = "%s%s%s" % (
+                self._join_flags(flags_values),
+                value,
+                self._get_end_of_line()
+            )
         else:
             tuple_text = self._get_inline_format_as_tuple(value)
             text = ''
@@ -215,7 +237,11 @@ class Printy:
                 section_flags = section[1] or default
                 if section_flags:
                     flags_values = self.get_flag_values(section_flags)
-                    text += f"{''.join(flags_values)}{section_text}{self.end_of_line}"
+                    text += "%s%s%s" % (
+                        self._join_flags(flags_values),
+                        section_text,
+                        self._get_end_of_line()
+                    )
                 else:
                     text += section_text
         return text
@@ -223,3 +249,4 @@ class Printy:
     def format(self, value, flags=None, default=None):
         """ Prints out the value """
         print(self.get_formatted_text(value, flags, default))
+
