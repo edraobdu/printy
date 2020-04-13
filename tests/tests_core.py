@@ -1,6 +1,6 @@
 import unittest
 from unittest import mock
-from printy.exceptions import InvalidFlag
+from printy.exceptions import InvalidFlag, InvalidInputType
 from printy.core import (Printy, LINUX, OSX, WINDOWS)
 
 # If you find yourself struggling with import errors like
@@ -266,3 +266,14 @@ class TestInputy(unittest.TestCase):
         result_valid_boolean = self.inputy(type='bool')
 
         self.assertEqual(result_valid_boolean, True)
+
+    @mock.patch('builtins.input', return_value=str_valid_test)
+    def test_passing_and_invalid_input_type(self, mock_input):
+        """
+        Tests that passing and invalid input type raises an InvalidInputType
+        exception. We mock the input() just in case the tests reaches that section
+        """
+        invalid_input_type = 'not_int_nor_float'
+        with self.assertRaises(InvalidInputType) as e:
+            self.inputy(type=invalid_input_type)
+        self.assertEqual(e.exception.input_type, invalid_input_type)
