@@ -9,11 +9,11 @@ deploy:
     tags: true
   distributions: "sdist bdist_wheel"
   skip_existing: true
-
-  script: "mvn cobertura:cobertura"
-  after_success:
-    - bash <(curl -s https://codecov.io/bash)
 install:
   - pip install -r requirements.txt
+  - pip install coverage
 script:
   - nose2
+  - coverage run -m unittest discover
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

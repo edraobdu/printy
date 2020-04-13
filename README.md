@@ -1,6 +1,9 @@
 # Printy
 
-![PyPI](https://img.shields.io/pypi/v/printy) ![PyPI - License](https://img.shields.io/pypi/l/printy)
+![Travis (.org)](https://img.shields.io/travis/edraobdu/printy) 
+![PyPI](https://img.shields.io/pypi/v/printy) 
+![PyPI - License](https://img.shields.io/pypi/l/printy)
+
 
 Printy lets you colorize and apply some standard formats to your text with
 an intuitive and friendly API based on flags to specify the formats. You can
