@@ -69,12 +69,13 @@ If you need to use one of the special characters ('\[', '\]', '\@'), simply esca
 they show up, or, in case they are not placed in the form '\[flags\]Text\@'), you can include
 them without escaping, the algorithm will treat them as regular characters:
 
-[n]    >>>@ printy([c]'\[B\]\\[myemail\\@mydomain.com\\]\@'@)
+[n]    >>>@ printy([c]'\[B\]\\\[myemail\\\@mydomain.com\\\]\@'@)
     [B]\[myemail\@mydomain.com\]@
 
 [n]    >>>@ [g]# Here, the emails's '\@' would close the '\[B\]' statement,@
-[n]    >>>@ [g]# so we need to escape it@
-[n]    >>>@ printy([c]'\[B\]\[myemail\\@mydomain.com\]\@'@)
+[n]    >>>@ [g]# so we need to escape it anyway. But look at how we don't @
+[n]    >>>@ [g]# escape the \[ and \] characters. @
+[n]    >>>@ printy([c]'\[B\]\[myemail\\\@mydomain.com\]\@'@)
     [B][myemail\@mydomain.com]@
 
 Now you can do stuffs like:

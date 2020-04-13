@@ -1,12 +1,13 @@
-import os
+import sys
 import platform
 
-from .exceptions import InvalidFlag
+from .exceptions import InvalidFlag, InvalidInputType
 
 
 LINUX = 'Linux'
 WINDOWS = 'Windows'
 OSX = 'Darwin'
+
 
 class Printy:
     """
@@ -256,7 +257,105 @@ class Printy:
                         text += section_text
         return text
 
-    def format(self, value, flags=None, default=None):
-        """ Prints out the value """
-        print(self.get_formatted_text(value, flags, default))
+    @staticmethod
+    def read_file(file):
+        """ Given a file path, we read it and print it out """
+        file = str(file)
+        with open(file) as f:
+            text = f.read()
+        return text
 
+    def format(self, value='', flags=None, default=None, file='', end='\n'):
+        """ Prints out the value """
+        value = self.read_file(file) if file else value
+        print(self.get_formatted_text(value, flags, default), end=end)
+
+    ##### Inputy
+    def format_input(self, *args, **kwargs):
+        """
+        Colorize the text prompted by input().
+
+        Also, it takes an additional parameter 'type', to tell the prompt not
+        to accept a format other than the specified. As every input is converted
+        to strings, a string that can be converted to the specified type is
+        allowed. For example, if type=int, then the user would be forced to
+        enter a number or a string that can be converted into an integer
+        """
+
+        # Types (str is the default)
+        BOOL = 'bool'
+        INT = 'int'
+        FLOAT = 'float'
+        STR = 'str'
+        types = [BOOL, INT, FLOAT, STR]
+
+        # If passed, we'll force the user to write a value with the specific
+        # input_types' format.
+        input_type = kwargs.get('type', STR)
+        if input_type not in types:
+            raise InvalidInputType(input_type)
+
+        # so we don't pass it to the get_formatted_text function
+        if 'type' in kwargs:
+            kwargs.pop('type')
+        # Include the value for the get_formatted_text function
+        if len(args) == 0:
+            args = ['']
+
+        # Will tell us whether the user sent a value value according to the
+        # specified type or not
+        valid_value = False
+        result = None
+        while not valid_value:
+            # Prints out the message if any was passed
+            result = str(input(self.get_formatted_text(*args, **kwargs)))
+
+            if input_type == BOOL:
+                # now let's try to convert the value to a Boolean
+                if result.lower() in ['false', 'true']:
+                    if result.lower() == 'false':
+                        result = False
+                    elif result.lower() == 'true':
+                        result = True
+                    valid_value = True
+                else:
+                    self.format(
+                        "'[y]%s@' is not a boolean, please enter"
+                        " [b]True@ or [b]False@" % result
+                    )
+
+            elif input_type == INT:
+                # Let's try to convert it to integer
+                if not isinstance(result, int):
+                    try:
+                        result = int(result)
+                    except (ValueError, TypeError):
+                        self.format(
+                            "'[y]%s@' is not a valid number, please enter a [b]rounded@"
+                            " number, please check you are not adding some "
+                            "decimal digits" % result
+                        )
+                    else:
+                        valid_value = True
+                else:
+                    valid_value = True
+
+            elif input_type == FLOAT:
+                # Almost the same for integer, but this time it just have to
+                # be a number, rounded or not
+                if not isinstance(result, (float, int)):
+                    try:
+                        result = float(result)
+                    except (ValueError, TypeError):
+                        self.format(
+                            "'[y]%s@' is not a valid number" % result
+                        )
+                    else:
+                        valid_value = True
+                else:
+                    valid_value = True
+            else:
+                result = str(result)
+                valid_value = True
+
+        return result

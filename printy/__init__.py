@@ -11,5 +11,5 @@ printy = printy_instance.format
 raw_format = printy_instance.get_formatted_text
 
 # Main function to extend input() functionality
-# inputy = printy_instance.format_input
+inputy = printy_instance.format_input
 

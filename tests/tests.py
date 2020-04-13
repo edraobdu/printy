@@ -1,4 +1,5 @@
 import unittest
+from unittest import mock
 from printy.exceptions import InvalidFlag
 from printy.core import (Printy, LINUX, OSX, WINDOWS)
 
@@ -8,7 +9,7 @@ from printy.core import (Printy, LINUX, OSX, WINDOWS)
 # >>> pip install nose2
 
 
-class TestGlobalColorPrint(unittest.TestCase):
+class TestGlobalFlagsPrinty(unittest.TestCase):
     """ Test case for formatting with a global set of flags specified """
 
     def setUp(self):
@@ -16,6 +17,29 @@ class TestGlobalColorPrint(unittest.TestCase):
         self.printy_instance = Printy()
         self.printy = self.printy_instance.format
         self.raw_text = self.printy_instance.get_formatted_text
+
+    def test_empty_value(self):
+        """ Tests passing an empty value print's nothing"""
+        text = ''
+        result = self.raw_text(text)
+
+        self.assertEqual(result, text)
+
+    def test_empty_value_with_flags(self):
+        """
+        Tests that passing and empty value with some flags returns the
+        escape ansi characters
+        """
+        i_printy = self.printy_instance
+        text = ''
+        flags = 'rBH'
+        result = self.raw_text(text, flags)
+        expected_result = "%s%s" % (
+                i_printy._join_flags(i_printy.get_flag_values(flags)),
+                i_printy._get_end_of_line()
+        )
+
+        self.assertEqual(result, expected_result)
 
     def test_single_invalid_flag(self):
         """
@@ -92,7 +116,7 @@ class TestGlobalColorPrint(unittest.TestCase):
         self.assertTrue(result_one == result_two == self.sample_text)
 
 
-class TestInlineColorPrint(unittest.TestCase):
+class TestInlineFlagsPrinty(unittest.TestCase):
     """ Test case for inline formatting """
 
     def setUp(self):
@@ -172,3 +196,73 @@ class TestInlineColorPrint(unittest.TestCase):
 
         self.assertTrue(result_one == result_two == sample_text_expected)
 
+
+class TestInputy(unittest.TestCase):
+    """
+    Test case for inputy functionality
+
+    Here, it is not necessary to test whether the prompted message has the
+    correct format because it uses the methods already tested in the Printy
+    test cases
+    """
+
+    def setUp(self):
+        self.inputy = Printy().format_input
+
+    str_valid_test = "Valid String"
+    int_valid_test = 23
+    float_valid_test = 45.6
+    bool_valid_test = False
+
+    @mock.patch('builtins.input', return_value=str_valid_test)
+    def test_passing_no_parameters_returns_a_value_str(self, mock_input):
+        """ Testing 'inputy' as a normal 'input()' function """
+        result_str = self.inputy()
+        self.assertEqual(result_str, self.str_valid_test)
+
+    @mock.patch('builtins.input', return_value=int_valid_test)
+    def test_passing_no_parameters_returns_a_value_str_from_int(self, mock_input):
+        """ Testing 'inputy' as a normal 'input()' function """
+        result_str_from_int = self.inputy()
+        self.assertEqual(result_str_from_int, str(self.int_valid_test))
+
+    @mock.patch('builtins.input', side_effect=[str_valid_test, bool_valid_test, float_valid_test, None, int_valid_test])
+    def test_passed_invalid_when_requested_int(self, mock_input):
+        """
+        Test that, when specifying the users has to enter an integer,
+        the message is prompted until a valid number is passed
+        """
+        result_valid_int = self.inputy(type='int')
+
+        self.assertEqual(result_valid_int, self.int_valid_test)
+
+    @mock.patch('builtins.input', side_effect=[None, str_valid_test, bool_valid_test, float_valid_test])
+    def test_passed_invalid_when_requested_float(self, mock_input):
+        """
+        Test that, when specifying the users has to enter a number,
+        the message is prompted until a valid number is passed
+        """
+        result_valid_int = self.inputy(type='float')
+
+        self.assertEqual(result_valid_int, self.float_valid_test)
+
+    @mock.patch('builtins.input', side_effect=[str_valid_test, None, int_valid_test, bool_valid_test])
+    def test_passed_invalid_when_requested_boolean(self, mock_input):
+        """
+        Test that, when specifying the user has to enter a boolean
+        the message is prompted until a boolean is passed
+        """
+        result_valid_boolean = self.inputy(type='bool')
+
+        self.assertEqual(result_valid_boolean, self.bool_valid_test)
+
+    @mock.patch('builtins.input', side_effect=[str_valid_test, None, int_valid_test, 'true'])
+    def test_passed_invalid_when_requested_boolean_str(self, mock_input):
+        """
+        Test that, when specifying the user has to enter a boolean
+        the message is prompted until a test case insensitive with the name of
+        one of the boolean values is passed
+        """
+        result_valid_boolean = self.inputy(type='bool')
+
+        self.assertEqual(result_valid_boolean, True)
