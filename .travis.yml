@@ -11,7 +11,6 @@ deploy:
   skip_existing: true
 install:
   - pip install -r requirements.txt
-  - pip install coverage
 script:
   - nose2
   - coverage run -m unittest discover
