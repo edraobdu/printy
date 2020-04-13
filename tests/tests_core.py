@@ -2,6 +2,7 @@ import unittest
 from unittest import mock
 from printy.exceptions import InvalidFlag, InvalidInputType
 from printy.core import (Printy, LINUX, OSX, WINDOWS)
+from printy.flags import Flags
 
 # If you find yourself struggling with import errors like
 # 'ImportError: attempted relative import with no known parent package'
@@ -14,9 +15,8 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
 
     def setUp(self):
         self.sample_text = "Some Text To Print Out"
-        self.printy_instance = Printy()
-        self.printy = self.printy_instance.format
-        self.raw_text = self.printy_instance.get_formatted_text
+        self.printy = Printy()
+        self.raw_text = self.printy.get_formatted_text
 
     def test_empty_value(self):
         """ Tests passing an empty value print's nothing"""
@@ -30,13 +30,12 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
         Tests that passing and empty value with some flags returns the
         escape ansi characters
         """
-        i_printy = self.printy_instance
         text = ''
         flags = 'rBH'
         result = self.raw_text(text, flags)
         expected_result = "%s%s" % (
-                i_printy._join_flags(i_printy.get_flag_values(flags)),
-                i_printy._get_end_of_line()
+                Flags.join_flags(Flags.get_flag_values(flags)),
+                Flags.get_end_of_line()
         )
 
         self.assertEqual(result, expected_result)
@@ -48,7 +47,7 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
         """
         invalid_flag = 'P'
         with self.assertRaises(InvalidFlag):
-            self.printy(self.sample_text, invalid_flag)
+            self.printy.format(self.sample_text, invalid_flag)
 
     def test_multiple_invalid_flag(self):
         """
@@ -59,7 +58,7 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
         # with 'P' as invalid flag
         flags = 'yBPGr'
         with self.assertRaises(InvalidFlag) as e:
-            self.printy(self.sample_text, flags)
+            self.printy.format(self.sample_text, flags)
         self.assertEqual(e.exception.flag, 'P')
 
     def tests_always_closing_format(self):
@@ -69,7 +68,7 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
         result = self.raw_text(self.sample_text, 'r')
         closing_tag = result[-4:]
         self.assertEqual(len(closing_tag), 4)
-        self.assertEqual(closing_tag, Printy._get_end_of_line())
+        self.assertEqual(closing_tag, Flags.get_end_of_line())
 
     def test_no_flag_parameter_passed(self):
         """
@@ -107,10 +106,10 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
         """
         flags = 'rBH'
         # Changes platform to Windows
-        self.printy_instance.platform = WINDOWS
+        self.printy.platform = WINDOWS
         result_one = self.raw_text(self.sample_text, flags)
         # Changes platform to Darwin
-        self.printy_instance.platform = OSX
+        self.printy.platform = OSX
         result_two = self.raw_text(self.sample_text, flags)
 
         self.assertTrue(result_one == result_two == self.sample_text)
@@ -120,9 +119,8 @@ class TestInlineFlagsPrinty(unittest.TestCase):
     """ Test case for inline formatting """
 
     def setUp(self):
-        self.printy_instance = Printy()
-        self.printy = self.printy_instance.format
-        self.raw_text = self.printy_instance.get_formatted_text
+        self.printy = Printy()
+        self.raw_text = self.printy.get_formatted_text
 
     def test_inline_format_with_global_flags(self):
         """
@@ -188,10 +186,10 @@ class TestInlineFlagsPrinty(unittest.TestCase):
         sample_text = "[rBH]Sample@ [y]Text@"
         sample_text_expected = "Sample Text"
         # Changes platform to Windows
-        self.printy_instance.platform = WINDOWS
+        self.printy.platform = WINDOWS
         result_one = self.raw_text(sample_text)
         # Changes platform to Darwin
-        self.printy_instance.platform = OSX
+        self.printy.platform = OSX
         result_two = self.raw_text(sample_text)
 
         self.assertTrue(result_one == result_two == sample_text_expected)

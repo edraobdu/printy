@@ -1,8 +1,7 @@
-import sys
 import platform
 
-from .exceptions import InvalidFlag, InvalidInputType
-
+from .exceptions import InvalidInputType
+from .flags import Flags
 
 LINUX = 'Linux'
 WINDOWS = 'Windows'
@@ -32,65 +31,7 @@ class Printy:
     ESCAPE_CHAR = 'escape_char'
 
     def __init__(self):
-        self.flags = self._get_flags()
         self.platform = platform.system()
-
-    escape_ansi_code = '\x1b['
-    escape_ansi_end = 'm'
-
-    #### COLORS (FG CODES)
-    BLACK = 'k', '30'
-    RED = 'r', '31'
-    GREEN = 'n', '32'
-    YELLOW = 'y', '33'
-    BLUE = 'b', '34'
-    MAGENTA = 'm', '35'
-    CYAN = 'c', '36'
-    WHITE = 'w', '37'
-    GREY = 'g', '90'
-
-    DEFAULT = 'p', '10'
-
-    #### FORMATS
-    BOLD = 'B', '1'
-    DIM = 'D', '2'
-    ITALIC = 'I', '3'
-    UNDERLINE = 'U', '4'
-    HIGHLIGHT = 'H', '7'
-    STRIKE = 'S', '9'
-
-    #### END OF LINE
-    reset = '0'
-
-    @classmethod
-    def _get_end_of_line(cls):
-        """ Defined method to get the 'reset' code """
-        return cls.escape_ansi_code + cls.reset + cls.escape_ansi_end
-
-    @classmethod
-    def _join_flags(cls, flags):
-        """ Given a set of flags, returned the final ansi code to add to the text"""
-        return "%s%s%s" % (cls.escape_ansi_code, ';'.join(flags), cls.escape_ansi_end)
-
-    @classmethod
-    def _get_flags(cls):
-        """
-        returns a dictionary where the flag is the key and the attribute
-        name is the value
-        """
-        return {y[0]: x for x, y in vars(cls).items()
-                if x.isupper() and isinstance(y, tuple) and len(y[0]) == 1}
-
-    def get_flag_values(self, flags):
-        """ returns a list of the escaped values for the flag labels """
-        flags_values = []
-        for flag in flags.replace(' ', ''):
-            if flag not in self.flags:
-                raise InvalidFlag(flag)
-            else:
-                if hasattr(self, self.flags[flag]):
-                    flags_values.append(getattr(self, self.flags[flag])[1])
-        return flags_values
 
     @classmethod
     def _define_char(cls, prev, current):
@@ -233,12 +174,12 @@ class Printy:
             text = self._get_cleaned_text(value)
         else:
             if flags:
-                flags_values = self.get_flag_values(flags)
+                flags_values = Flags.get_flag_values(flags)
                 value = self._get_cleaned_text(value)
                 text = "%s%s%s" % (
-                    self._join_flags(flags_values),
+                    Flags.join_flags(flags_values),
                     value,
-                    self._get_end_of_line()
+                    Flags.get_end_of_line()
                 )
             else:
                 tuple_text = self._get_inline_format_as_tuple(value)
@@ -247,11 +188,11 @@ class Printy:
                     section_text = self._replace_escaped(section[0])
                     section_flags = section[1] or default
                     if section_flags:
-                        flags_values = self.get_flag_values(section_flags)
+                        flags_values = Flags.get_flag_values(section_flags)
                         text += "%s%s%s" % (
-                            self._join_flags(flags_values),
+                            Flags.join_flags(flags_values),
                             section_text,
-                            self._get_end_of_line()
+                            Flags.get_end_of_line()
                         )
                     else:
                         text += section_text

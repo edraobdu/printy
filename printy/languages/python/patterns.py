@@ -116,8 +116,8 @@ PATTERS_IN_CLASSES = {
 # stores the first character of the patters, so, while looping the test
 # We can start an inspection on the text's sections that starts with one of
 # this
-POTENTIAL_GLOBAL_PATTERNS = set(GLOBAL_PATTERNS.keys())
-POTENTIAL_IN_CLASSES_PATTERNS = set(PATTERS_IN_CLASSES.keys())
+POTENTIAL_GLOBAL_PATTERNS = set(map(lambda x: x[0], GLOBAL_PATTERNS.keys()))
+POTENTIAL_IN_CLASSES_PATTERNS = set(map(lambda x: x[0], PATTERS_IN_CLASSES.keys()))
 
 
 def potential_pattern(char, in_class=False):
@@ -134,7 +134,7 @@ def potential_pattern(char, in_class=False):
     return False
 
 
-def define_pattern(char, remaining_text):
+def define_pattern(char, remaining_text, in_class):
     """
     Once we declare a character as a potential pattern, we need to start a block
     and figure out what special pattern it is, and what action to execute.
@@ -145,5 +145,24 @@ def define_pattern(char, remaining_text):
     need to ensure that everything inside a {} is formatted as regular python
     and not as string.
     """
-
-    is_potential = potential_pattern(char)
+    if potential_pattern(char, in_class):
+        # Now that we know this is a potential pattern, we keep looping
+        # to know which pattern exactly it is
+        pattern = [char]
+        for c in remaining_text:
+            pattern.append(c)
+            new_pattern = ''.join(pattern)
+            if not in_class:
+                # we just look up for a match in the global patterns
+                if new_pattern not in GLOBAL_PATTERNS.keys():
+                    continue
+                else:
+                    # Now, we need to know how we nned to proceed, let's start
+                    # with Inline comments
+                    # For inline comments, the block finishes when a new
+                    # line-brake is made
+                    pass
+            else:
+                # Then we need to lok up for a match in both global and
+                # in_classes patterns
+                pass
