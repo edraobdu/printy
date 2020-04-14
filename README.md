@@ -1,30 +1,29 @@
 # Printy
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ![Travis (.org)](https://img.shields.io/travis/edraobdu/printy?logo=travis) 
 ![Codecov](https://img.shields.io/codecov/c/gh/edraobdu/printy?logo=codecov)
 ![PyPI](https://img.shields.io/pypi/v/printy)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/printy)
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/printy)
+[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat)](#contributors-)
 ![PyPI - License](https://img.shields.io/pypi/l/printy)
 
-Printy lets you colorize and apply some standard formats to your text with
-an intuitive and friendly API based on flags to specify the formats. You can
-either apply a global format or inline formats to specific parts of your text!
+Printy is a **cross-platform** that lets you colorize and apply some standard formats 
+to your text with an intuitive and friendly API based on **flags**. You can
+either apply a global format or inline formats to specific parts of your text, and 
+some other interesting functionalities!
 
 
 ![Printy Demo](github/printy_demo.gif)
 
 
-### Installation
+## Installation
 
 you can either clone this repository or install it via pip
 ```python
 pip install printy
 ```
-### How to use it?
+## How to use it?
 
 Once you install printy, you can find a short but concise documentation about the
 available flags and the syntax opening a python console and running the following 
@@ -33,6 +32,7 @@ command:
 from printy import helpme
 ```
 This will print out some instructions right away.
+ 
 ##### Using global flags
 
 First of all, import printy:
@@ -42,12 +42,12 @@ from printy import printy
 
 Printy is still a 'print' statement, so you can use it as it is:
 ```python
-printy("Some text")
+printy("text with no format")
 ```
 You can use a global set of flags to specify a format you want to apply to the text,
 let's say we want to colorize a text with a bold blue and also adding an underline:
 ```python
-printy("Some text", 'bBU')
+printy("Text with a bold red color and underlined", 'bBU')
 ```
 ##### Using inline format
 Although applying a global format is interesting, it is not as much as applying
@@ -56,64 +56,101 @@ intuitive syntax to accomplish that goal. Use the [] to specify the flags to use
 for formatting the text, right before the text, and the @ to finish the formatting 
 section:
 ```python
-printy("Still [rI]Some@ Text")
+printy("Predefined format [rI]This is red and with italic style@ also predefined format")
 ```
 The text that is not surrounded by the format syntax will remain with the predefined 
 format.
 
-But you can always override this default color for inline format specifying the flags 
-in the 'default' parameter
+But you can always override this predefined format for inline format specifying the flags 
+in the 'predefined' parameter
 ```python
-printy("Still [rI]Some@ Text", default="b")
+printy("Now this is blue [rI]Still red italic@ and also blue", predefined="b")
 ```
-Or, you can override the whole format without having to change the inline format:
+Or, you can override the whole format without changing the inline format with a global flag:
 ```python
-printy("Still [rI]Some@ Text", "b")
+printy("Now i am still blue, [rI]and also me@, and me as well ", "b")
 ```
 
-###### New in v1.1.0
-### What about input()?
+Printy also supports reading from a file, just pass the path to your file
+in the file parameter:
+
 ```python
-from printy import inputy
+# NOTE: Here, it is necessary to specify the flags (if you want) 
+# in the 'flags' parameter
+printy(file="/path/to/your/file/file.extension", flags="cU")
 ```
+
+## What about input()?
+
 Printy also includes an alternative function for the builtin input(), that, not only
 lets us applies formats to the prompted message (if passed), but also, we can force
 the user to enter a certain type of data.
-
+```python
+from printy import inputy
+```
 Let's say we want to get an integer from the user's input, for that, we can set
 type='int' in the 'inputy' function (we can specify formats the same way we'd do
  with printy)
 ```python
-a = inputy("How many apples do you want?", 'rB', type='int')
-b = inputy("How many [rB]apples@ did you get?", type='int')
-c = inputy("Are you happy with that?", type='bool')
+a = inputy("How many apples do you want?", "rB", type="int")
+b = inputy("How many [rB]apples@ did you get?", type="int")
+c = inputy("Are you happy with that?", type="bool")
 ```
-In all of the above examples, if the user enters a value with a type other than
-an integer, the message will show again and will prompt also a warning (like this
-until the user enters a valid value according to the type) 
+In all of the above examples, if the user enters a value with a type other than 
+the one specified in 'type', the message will show again and will prompt also a warning 
+(and so on until the user enters a valid value according to the type)
 
-The best part is that the returned value's type is also the one of the specified 
+Also, you can specify if, for the integer type for example, the value must
+be a positive integer or a negative:
+
+```python
+a = inputy("How many apples do you want?", "rB", type="int", options="+")
+# ...
+```
+
+or for the boolean type:
+
+```python
+# ...
+c = inputy("Are you happy with that?", type="bool", options="i{y/n}")
+```
+
+That will indicate that the affirmative value to be entered would be 'y'
+or 'Y' (the 'i' at the beginning indicates 'case insensitive'), and the non
+affirmative value would be 'n' or 'N'.
+
+*NOTE: removing the 'i' would force the user to enter 'y' or 'n'. if no
+option is passed for the bool type, then the default would be True and False
+case insensitive.*
+
+**The best part** is that the returned value's type is also the one of the specified 
 type, therefore, from the above examples, both *a* and *b* will be integers, and
 *c* will be a boolean, so, you're gonna get the information right as you need it.   
 
 The current supported types are:
-* 'int' for integers, floating point numbers are not accepted, strings that can
-be converted to integer are accepted
-* 'float' for floating point numbers, or strings that can be converted to integer
-* 'bool' for booleans, either True or False, or also case insensitive strings
-'false' or 'true', etc.
-* 'str' by default if no 'type' is passed, eny input will be converted to string.
+
+* **'int'** for integers, floating point numbers are not accepted, strings that can
+be converted to integer are accepted. **Options**: '+', '-'
+
+* **'float'** for floating point numbers, or strings that can be converted to float.
+**Options**: '+', '-'
+
+* **'bool'** for booleans, default True and False. 
+**Options**: 'case_insensitive {your_defined_true_value / your_defined_false_value}', 
+*examples: 'i{y/n}', 'Yes/No'*
+
+* **'str'** the default type, if no 'type' is passed, this will be implemented
 
 
-### Dependencies
+## Dependencies
 
-Printy currently support Python 3.5 and up. Printy is currently only tested in 
-Unix-like operative systems.
+Printy currently support Python 3.5 and up. Printy is a cross-platform library
 
-### Contributing
+## Contributing
 
 Please feel free to contact me if you want to be part of the project and contribute.
-We'll looking forward to improve this simple but effective application.
+Fork or clone, push to your fork, make a pull request, let's make this a better app 
+every day!!
 
 ## Contributors ✨
 

@@ -1,6 +1,6 @@
 from .core import Printy
 
-__version__ = "1.1.1"
+__version__ = "1.2.0"
 
 printy_instance = Printy()
 
