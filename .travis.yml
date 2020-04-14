@@ -12,7 +12,6 @@ deploy:
 install:
   - pip install -r requirements.txt
 script:
-  - nose2
   - coverage run -m unittest discover
 after_success:
   - bash <(curl -s https://codecov.io/bash)

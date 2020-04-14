@@ -4,11 +4,6 @@ from printy.exceptions import InvalidFlag, InvalidInputType
 from printy.core import (Printy, LINUX, OSX, WINDOWS)
 from printy.flags import Flags
 
-# If you find yourself struggling with import errors like
-# 'ImportError: attempted relative import with no known parent package'
-# while running tests with 'unittest', just install 'nose2'
-# >>> pip install nose2
-
 
 class TestGlobalFlagsPrinty(unittest.TestCase):
     """ Test case for formatting with a global set of flags specified """
