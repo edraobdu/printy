@@ -1,12 +1,14 @@
 import platform
 
-from .exceptions import InvalidInputType
+from .exceptions import InvalidInputType, BoolOptionsNotValid
 from .flags import Flags
 
 LINUX = 'Linux'
 WINDOWS = 'Windows'
 OSX = 'Darwin'
 
+# For format() and format_input()
+default_end = '\n'
 
 class Printy:
     """
@@ -161,11 +163,11 @@ class Printy:
         tuple_text = cls._get_inline_format_as_tuple(text)
         return cls._replace_escaped(''.join(x[0] for x in tuple_text))
 
-    def get_formatted_text(self, value, flags=None, default=None):
+    def get_formatted_text(self, value, flags=None, predefined=None):
         """
         Applies the format specified by the 'flags' to the 'value'.
 
-        If 'flag's is passed, 'default' will be omitted.
+        If 'flag's is passed, 'predefined' will be omitted.
         """
         # As of right now, Windows PowerShell and Command line does not apply
         # the format to the text without a specific configuration. So we'll
@@ -186,7 +188,7 @@ class Printy:
                 text = ''
                 for section in tuple_text:
                     section_text = self._replace_escaped(section[0])
-                    section_flags = section[1] or default
+                    section_flags = section[1] or predefined
                     if section_flags:
                         flags_values = Flags.get_flag_values(section_flags)
                         text += "%s%s%s" % (
@@ -206,12 +208,83 @@ class Printy:
             text = f.read()
         return text
 
-    def format(self, value='', flags=None, default=None, file='', end='\n'):
+    def format(self, value='', flags=None, predefined=None, file='', end=default_end):
         """ Prints out the value """
         value = self.read_file(file) if file else value
-        print(self.get_formatted_text(value, flags, default), end=end)
+        print(self.get_formatted_text(value, flags, predefined), end=end)
 
     ##### Inputy
+
+    # Types (str is the default)
+    BOOL = 'bool'
+    INT = 'int'
+    FLOAT = 'float'
+    STR = 'str'
+    types = [BOOL, INT, FLOAT, STR]
+
+    @staticmethod
+    def construct_end_line(*args, **kwargs):
+        """
+        For inputy, given certain parameters we can create a probable end of
+        line, this is, a helper message for the user, in case we set, for
+        example, if we set that the value must be an integer, we could add
+        that information to the end user.
+        """
+        end = kwargs.get('end', default_end)
+        value_type = kwargs.get('end', None)
+        pass
+
+    @staticmethod
+    def get_bool_options(bool_options):
+        """
+        Strips the string passed as bool_options and returns the valid values,
+        let's say the bool_options = 'i{Y/n}', then it will return a tuple
+        containing:
+            insensitive, true, false = True, 'Y', 'n'
+        """
+        insensitive, true_value, false_value = True, True, False
+        if bool_options:
+            opts = list(bool_options.replace('{', '').replace('}', '').replace('/', ''))
+            # It might end up with 2 or 3 values, if its 3, the first one must be
+            # the case insensitive indicator 'i'
+            if len(opts) == 3 and opts[0] != 'i':
+                raise BoolOptionsNotValid
+            elif len(opts) > 3 or len(opts) <= 1:
+                raise BoolOptionsNotValid
+            elif len(opts) == 3:
+                insensitive, true_value, false_value = opts
+            else:
+                true_value, false_value = opts
+
+        return insensitive, true_value, false_value
+
+    def check_boolean(self, value, bool_options):
+        """
+        Validates the value when the type must be a boolean, returns a boolean
+        specifying whether it is a valid value, and if it is, returns the final
+        value (after conversions if necessary)
+        """
+        insensitive, true_value, false_value = self.get_bool_options(bool_options)
+        true_value = str(true_value)
+        false_value = str(false_value)
+        error_msg = "%s is not a valid value, enter %s or %s" % (
+            value,
+            true_value,
+            false_value,
+        )
+        if insensitive:
+            value = value.lower()
+            true_value = true_value.lower()
+            false_value = false_value.lower()
+        if value == true_value:
+            return True, True
+        elif value == false_value:
+            return False, True
+        else:
+            self.format(error_msg)
+            return False, False
+
+
     def format_input(self, *args, **kwargs):
         """
         Colorize the text prompted by input().
@@ -223,22 +296,28 @@ class Printy:
         enter a number or a string that can be converted into an integer
         """
 
-        # Types (str is the default)
-        BOOL = 'bool'
-        INT = 'int'
-        FLOAT = 'float'
-        STR = 'str'
-        types = [BOOL, INT, FLOAT, STR]
-
         # If passed, we'll force the user to write a value with the specific
         # input_types' format.
-        input_type = kwargs.get('type', STR)
-        if input_type not in types:
+        input_type = kwargs.get('type', self.STR)
+        if input_type not in self.types:
             raise InvalidInputType(input_type)
 
-        # so we don't pass it to the get_formatted_text function
+        # bool_options will override the default True/False
+        # it has to be passed as a string with the following syntax:
+        # bool_options="i{True/False}", where 'i', if passed, will tell us
+        # that the values are case insensitive, otherwise, values will be forced
+        # to a exact match
+        bool_options = kwargs.get('bool_options', '')
+        # when no value is entered, the default will be added
+        default = kwargs.get('default', '')
+
+        # remove extra parameters so we don't pass it to
+        # the get_formatted_text function
         if 'type' in kwargs:
             kwargs.pop('type')
+        if 'bool_options' in kwargs:
+            kwargs.pop('bool_options')
+
         # Include the value for the get_formatted_text function
         if len(args) == 0:
             args = ['']
@@ -251,21 +330,11 @@ class Printy:
             # Prints out the message if any was passed
             result = str(input(self.get_formatted_text(*args, **kwargs)))
 
-            if input_type == BOOL:
+            if input_type == self.BOOL:
                 # now let's try to convert the value to a Boolean
-                if result.lower() in ['false', 'true']:
-                    if result.lower() == 'false':
-                        result = False
-                    elif result.lower() == 'true':
-                        result = True
-                    valid_value = True
-                else:
-                    self.format(
-                        "'[y]%s@' is not a boolean, please enter"
-                        " [b]True@ or [b]False@" % result
-                    )
+                result, valid_value = self.check_boolean(result, bool_options)
 
-            elif input_type == INT:
+            elif input_type == self.INT:
                 # Let's try to convert it to integer
                 if not isinstance(result, int):
                     try:
@@ -281,7 +350,7 @@ class Printy:
                 else:
                     valid_value = True
 
-            elif input_type == FLOAT:
+            elif input_type == self.FLOAT:
                 # Almost the same for integer, but this time it just have to
                 # be a number, rounded or not
                 if not isinstance(result, (float, int)):
