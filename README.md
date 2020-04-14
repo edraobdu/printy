@@ -47,7 +47,7 @@ printy("text with no format")
 You can use a global set of flags to specify a format you want to apply to the text,
 let's say we want to colorize a text with a bold blue and also adding an underline:
 ```python
-printy("Text with a bold red color and underlined", 'bBU')
+printy("Text with a bold blue color and underlined", 'bBU')
 ```
 ##### Using inline format
 Although applying a global format is interesting, it is not as much as applying

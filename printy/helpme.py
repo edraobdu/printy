@@ -10,6 +10,9 @@ an intuitive and friendly API based on flags to specify the formats. You can
 either apply a global format or inline formats to specific parts of your text!
 And yes, this whole tutorial is written with Printy!!
 
+[gI]NOTE: If you are on windows, you may not see some of the formats due
+to Windows console limitations@
+
 [n]Let's get started!@
 
 [B]COLORS@
@@ -22,14 +25,17 @@ And yes, this whole tutorial is written with Printy!!
 [m]'m' -> Applies a magenta color to the text@
 [c]'c' -> Applies a cyan color to the text@
 [k]'k' -> Applies a black color to the text@
+[w]'w' -> Applies a white color to the text@
 [p]'p' -> Applies the predefined color to the text@
 
 [B]FORMATS@
 
 [B]'B' -> Applies a bold font weight to the text@
+[D]'D' -> Decrease the intensity, aka Dim@
 [U]'U' -> Applies an underline to the text@
 [I]'I' -> Applies an italic font type to the text@
 [H]'H' -> Highlights the text@
+[S]'S' -> crosses out the text, aka Strike@
 
 
 [B]HOW TO USE IT?@
@@ -99,7 +105,20 @@ Or, you can use it with python's formatting strings as well:
 
 [n]    >>>@ minutes = [b]60@
 [n]    >>>@ printy([c]f'A day has \[y\]@[r]{@[p]minutes * @[b]24@[r]}@[c]\@ minutes'@)
-    A day has [y]1400@ minutes"""
+    A day has [y]1400@ minutes
+
+[B]What about @[b]input@()?
+
+printy comes with a wrapper for the python builtins input() function
+
+[n]    >>>@ [r]from@ printy [r]import@ inputy
+
+Try adding adding some formats the same way you did with printy.
+
+[By]Check this link for a full documentation!@
+
+https://github.com/edraobdu/printy    
+"""
 
 print(Printy().get_formatted_text(helpme))
 
