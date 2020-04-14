@@ -1,6 +1,9 @@
 import platform
 
-from .exceptions import InvalidInputType, BoolOptionsNotValid
+from .exceptions import (
+    InvalidInputType, BoolOptionsNotValid,
+    IntOptionsNotValid, FloatOptionsNotValid
+)
 from .flags import Flags
 
 LINUX = 'Linux'
@@ -9,6 +12,7 @@ OSX = 'Darwin'
 
 # For format() and format_input()
 default_end = '\n'
+
 
 class Printy:
     """
@@ -258,6 +262,20 @@ class Printy:
 
         return insensitive, true_value, false_value
 
+    @staticmethod
+    def get_int_options(int_options):
+        """ Checks that only '+' or '-' are passed """
+        # the default is None, which will accept any number, positive or negative
+        if int_options:
+            if len(int_options) > 1:
+                raise IntOptionsNotValid
+            else:
+                if int_options in ('+', '-'):
+                    return int_options
+                else:
+                    raise IntOptionsNotValid
+        return None
+
     def check_boolean(self, value, bool_options):
         """
         Validates the value when the type must be a boolean, returns a boolean
@@ -284,6 +302,42 @@ class Printy:
             self.format(error_msg)
             return False, False
 
+    def check_integer(self, value, int_options):
+        """
+        Validates the value when the type must be an integer, returns a boolean
+        specifying whether it is a valid value, and if it is, returns the final
+        value (after conversions if necessary)
+        """
+        # the only options allowed for integer types are '+' and '-'
+        opt = self.get_int_options(int_options)
+        error_msg = (
+            "%s is not a valid number,please enter a [b]rounded@"
+            " number, please check you are not adding some "
+            "decimal digits" % value
+        )
+        if opt:
+            error_msg += ', make sure also it is a %s number' % (
+                'positive' if opt == '+' else 'negative'
+            )
+        # Let's try to convert it to integer
+        valid_value = False
+        if not isinstance(value, int):
+            try:
+                value = int(value)
+            except (ValueError, TypeError):
+                self.format(error_msg)
+            else:
+                if opt:
+                    if opt == '+' and value >= 0:
+                        valid_value = True
+                    elif opt == '-' and value < 0:
+                        valid_value = True
+                else:
+                    valid_value = True
+        else:
+            valid_value = True
+
+        return value, valid_value
 
     def format_input(self, *args, **kwargs):
         """
@@ -307,7 +361,7 @@ class Printy:
         # bool_options="i{True/False}", where 'i', if passed, will tell us
         # that the values are case insensitive, otherwise, values will be forced
         # to a exact match
-        bool_options = kwargs.get('bool_options', '')
+        options = kwargs.get('options', '')
         # when no value is entered, the default will be added
         default = kwargs.get('default', '')
 
@@ -315,8 +369,8 @@ class Printy:
         # the get_formatted_text function
         if 'type' in kwargs:
             kwargs.pop('type')
-        if 'bool_options' in kwargs:
-            kwargs.pop('bool_options')
+        if 'options' in kwargs:
+            kwargs.pop('options')
 
         # Include the value for the get_formatted_text function
         if len(args) == 0:
@@ -332,23 +386,11 @@ class Printy:
 
             if input_type == self.BOOL:
                 # now let's try to convert the value to a Boolean
-                result, valid_value = self.check_boolean(result, bool_options)
+                result, valid_value = self.check_boolean(result, options)
 
             elif input_type == self.INT:
                 # Let's try to convert it to integer
-                if not isinstance(result, int):
-                    try:
-                        result = int(result)
-                    except (ValueError, TypeError):
-                        self.format(
-                            "'[y]%s@' is not a valid number, please enter a [b]rounded@"
-                            " number, please check you are not adding some "
-                            "decimal digits" % result
-                        )
-                    else:
-                        valid_value = True
-                else:
-                    valid_value = True
+                result, valid_value = self.check_integer(result, options)
 
             elif input_type == self.FLOAT:
                 # Almost the same for integer, but this time it just have to

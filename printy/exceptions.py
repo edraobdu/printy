@@ -24,12 +24,24 @@ class InvalidInputType(Exception):
         return "'%s' is not a valid type" % self.input_type
 
 
-class BoolOptionsNotValid(Exception):
-    """ Raises when the bool_options for the inputy function is wrong written """
+class OptionsNotValid(Exception):
+    """ Raises when the options for the inputy function is wrong written """
 
-    def __init__(self, bool_options):
-        self.bool_options = bool_options
+    def __init__(self, options):
+        self.options = options
 
     def __str__(self):
-        return "'%s' is not a valid value for the bool_options" \
-               " parameter, please check its structure" % self.bool_options
+        return "'%s' is not a valid value for the 'options' parameter" \
+               ", please check its structure" % self.options
+
+
+class BoolOptionsNotValid(OptionsNotValid):
+    pass
+
+
+class IntOptionsNotValid(Exception):
+    pass
+
+
+class FloatOptionsNotValid(Exception):
+    pass
