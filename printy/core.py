@@ -8,7 +8,6 @@ LINUX = 'Linux'
 WINDOWS = 'Windows'
 OSX = 'Darwin'
 
-
 class Printy:
     """
     Applies a format to the output of the print statement according
@@ -32,6 +31,14 @@ class Printy:
     ESCAPE_CHAR = 'escape_char'
 
     def __init__(self):
+        
+        # Set Virtual Terminal Processing for Windows Machines
+        from platform import system
+        if "win" in system().lower(): #works for Win7, 8, 10 ...
+            from ctypes import windll
+            k=windll.kernel32
+            k.SetConsoleMode(k.GetStdHandle(-11),7)
+
         self.flags = self._get_flags()
         self.platform = platform.system()
 
