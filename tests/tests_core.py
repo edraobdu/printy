@@ -94,20 +94,29 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
 
         self.assertTrue(result_one == result_two == result_three)
 
-    def test_no_linux_platform_return_cleaned_value(self):
+    @mock.patch('printy.core.Printy.set_windows_console_mode', return_value=True)
+    def test_virtual_terminal_processing_on_windows(self, mock_console_mode):
         """
-        Tests that if printy is used on platforms other than Linux it still
-        returns the cleaned value
+        Tests that if platform is windows, then then returns True
+        """
+        self.printy.platform = WINDOWS
+        virtual_terminal_processing = mock_console_mode()
+
+        self.assertTrue(virtual_terminal_processing)
+
+    def test_return_cleaned_value_if_windows_is_not_properly_configured(self):
+        """
+        Tests that if printy virtual_console_mode is false, then it returns the
+        cleaned_text
         """
         flags = 'rBH'
         # Changes platform to Windows
         self.printy.platform = WINDOWS
-        result_one = self.raw_text(self.sample_text, flags)
-        # Changes platform to Darwin
-        self.printy.platform = OSX
-        result_two = self.raw_text(self.sample_text, flags)
+        self.printy.virtual_terminal_processing = False
 
-        self.assertTrue(result_one == result_two == self.sample_text)
+        result_one = self.raw_text(self.sample_text, flags)
+
+        self.assertEqual(result_one, self.sample_text)
 
 
 class TestInlineFlagsPrinty(unittest.TestCase):
@@ -172,22 +181,6 @@ class TestInlineFlagsPrinty(unittest.TestCase):
         inline_format = self.raw_text(inline_text)
 
         self.assertEqual(inline_format, joined_global_format)
-
-    def test_no_linux_platform_return_cleaned_value(self):
-        """
-        Tests that if printy is used on platforms other than Linux it still
-        returns the cleaned value
-        """
-        sample_text = "[rBH]Sample@ [y]Text@"
-        sample_text_expected = "Sample Text"
-        # Changes platform to Windows
-        self.printy.platform = WINDOWS
-        result_one = self.raw_text(sample_text)
-        # Changes platform to Darwin
-        self.printy.platform = OSX
-        result_two = self.raw_text(sample_text)
-
-        self.assertTrue(result_one == result_two == sample_text_expected)
 
 
 class TestInputy(unittest.TestCase):

@@ -37,13 +37,28 @@ class Printy:
     ESCAPE_CHAR = 'escape_char'
 
     def __init__(self):
-        # Set Virtual Terminal Processing for Windows Machines
-        from platform import system
-        if "win" in system().lower():  # works for Win7, 8, 10 ...
-            from ctypes import windll
-            k = windll.kernel32
-            k.SetConsoleMode(k.GetStdHandle(-11), 7)
         self.platform = platform.system()
+        self.virtual_terminal_processing = self.set_windows_console_mode()
+
+    def set_windows_console_mode(self):
+        """
+        For Windows os to work and get the escape sequences correctly,
+        we'll need to enable the variable ENABLE_VIRTUAL_TERMINAL_PROCESSING
+
+        @Thanks to Mihir Singh (mihirs16) for this big improvement
+        """
+        # In case there is some error while setting it up, we returns False to
+        # indicate that windows will not print the escape sequences correctly,
+        # so we can print out the cleaned text
+        if self.platform == WINDOWS:
+            try:
+                from ctypes import windll
+                k = windll.kernel32
+                k.SetConsoleMode(k.GetStdHandle(-11), 7)
+                return True
+            except ImportError:
+                return False
+        return False
 
     @classmethod
     def _define_char(cls, prev, current):
@@ -179,10 +194,7 @@ class Printy:
 
         If 'flag's is passed, 'predefined' will be omitted.
         """
-        # As of right now, Windows PowerShell and Command line does not apply
-        # the format to the text without a specific configuration. So we'll
-        # return the cleaned text for Windows and MacOS operative systems
-        if self.platform != LINUX:
+        if self.platform == WINDOWS and not self.virtual_terminal_processing:
             text = self._get_cleaned_text(value)
         else:
             if flags:
