@@ -39,9 +39,9 @@ class BoolOptionsNotValid(OptionsNotValid):
     pass
 
 
-class IntOptionsNotValid(Exception):
+class IntOptionsNotValid(OptionsNotValid):
     pass
 
 
-class FloatOptionsNotValid(Exception):
+class FloatOptionsNotValid(OptionsNotValid):
     pass

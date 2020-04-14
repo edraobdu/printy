@@ -270,13 +270,14 @@ class Printy:
             # It might end up with 2 or 3 values, if its 3, the first one must be
             # the case insensitive indicator 'i'
             if len(opts) == 3 and opts[0] != 'i':
-                raise BoolOptionsNotValid
+                raise BoolOptionsNotValid(bool_options)
             elif len(opts) > 3 or len(opts) <= 1:
-                raise BoolOptionsNotValid
+                raise BoolOptionsNotValid(bool_options)
             elif len(opts) == 3:
-                insensitive, true_value, false_value = opts
+                insensitive, true_value, false_value = True, opts[1], opts[2]
             else:
                 true_value, false_value = opts
+                insensitive = False
 
         return insensitive, true_value, false_value
 
@@ -286,12 +287,12 @@ class Printy:
         # the default is None, which will accept any number, positive or negative
         if int_options:
             if len(int_options) > 1:
-                raise IntOptionsNotValid
+                raise IntOptionsNotValid(int_options)
             else:
                 if int_options in ('+', '-'):
                     return int_options
                 else:
-                    raise IntOptionsNotValid
+                    raise IntOptionsNotValid(int_options)
         return None
 
     def check_boolean(self, value, bool_options):
@@ -332,6 +333,42 @@ class Printy:
             "%s is not a valid number,please enter a [b]rounded@"
             " number, please check you are not adding some "
             "decimal digits" % value
+        )
+        if opt:
+            error_msg += ', make sure also it is a %s number' % (
+                'positive' if opt == '+' else 'negative'
+            )
+        # Let's try to convert it to integer
+        valid_value = False
+        if not isinstance(value, int):
+            try:
+                value = int(value)
+            except (ValueError, TypeError):
+                self.format(error_msg)
+            else:
+                if opt:
+                    if opt == '+' and value >= 0:
+                        valid_value = True
+                    elif opt == '-' and value < 0:
+                        valid_value = True
+                else:
+                    valid_value = True
+        else:
+            valid_value = True
+
+        return value, valid_value
+
+    def check_float(self, value, int_options):
+        """
+        Validates the value when the type must be an float, similar to integer check,
+        but now it can have decimal digits, returns a boolean specifying whether it
+        is a valid value, and if it is, returns the final
+        value (after conversions if necessary)
+        """
+        # Same integer options are allowed
+        opt = self.get_int_options(int_options)
+        error_msg = (
+            "%s is not a valid number" % value
         )
         if opt:
             error_msg += ', make sure also it is a %s number' % (

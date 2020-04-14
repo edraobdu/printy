@@ -1,7 +1,10 @@
 import unittest
 from unittest import mock
-from printy.exceptions import InvalidFlag, InvalidInputType
-from printy.core import (Printy, LINUX, OSX, WINDOWS)
+from printy.exceptions import (
+    InvalidFlag, InvalidInputType, BoolOptionsNotValid,
+    IntOptionsNotValid, FloatOptionsNotValid
+)
+from printy.core import Printy, WINDOWS
 from printy.flags import Flags
 
 
@@ -193,7 +196,7 @@ class TestInputy(unittest.TestCase):
     """
 
     def setUp(self):
-        self.inputy = Printy().format_input
+        self.inputy = Printy()
 
     str_valid_test = "Valid String"
     int_valid_test = 23
@@ -203,13 +206,13 @@ class TestInputy(unittest.TestCase):
     @mock.patch('builtins.input', return_value=str_valid_test)
     def test_passing_no_parameters_returns_a_value_str(self, mock_input):
         """ Testing 'inputy' as a normal 'input()' function """
-        result_str = self.inputy()
+        result_str = self.inputy.format_input()
         self.assertEqual(result_str, self.str_valid_test)
 
     @mock.patch('builtins.input', return_value=int_valid_test)
     def test_passing_no_parameters_returns_a_value_str_from_int(self, mock_input):
         """ Testing 'inputy' as a normal 'input()' function """
-        result_str_from_int = self.inputy()
+        result_str_from_int = self.inputy.format_input()
         self.assertEqual(result_str_from_int, str(self.int_valid_test))
 
     @mock.patch('builtins.input', side_effect=[str_valid_test, bool_valid_test, float_valid_test, None, int_valid_test])
@@ -218,7 +221,7 @@ class TestInputy(unittest.TestCase):
         Test that, when specifying the users has to enter an integer,
         the message is prompted until a valid number is passed
         """
-        result_valid_int = self.inputy(type='int')
+        result_valid_int = self.inputy.format_input(type='int')
 
         self.assertEqual(result_valid_int, self.int_valid_test)
 
@@ -228,7 +231,7 @@ class TestInputy(unittest.TestCase):
         Test that, when specifying the users has to enter a number,
         the message is prompted until a valid number is passed
         """
-        result_valid_int = self.inputy(type='float')
+        result_valid_int = self.inputy.format_input(type='float')
 
         self.assertEqual(result_valid_int, self.float_valid_test)
 
@@ -238,7 +241,7 @@ class TestInputy(unittest.TestCase):
         Test that, when specifying the user has to enter a boolean
         the message is prompted until a boolean is passed
         """
-        result_valid_boolean = self.inputy(type='bool')
+        result_valid_boolean = self.inputy.format_input(type='bool')
 
         self.assertEqual(result_valid_boolean, self.bool_valid_test)
 
@@ -249,7 +252,7 @@ class TestInputy(unittest.TestCase):
         the message is prompted until a test case insensitive with the name of
         one of the boolean values is passed
         """
-        result_valid_boolean = self.inputy(type='bool')
+        result_valid_boolean = self.inputy.format_input(type='bool')
 
         self.assertEqual(result_valid_boolean, True)
 
@@ -261,5 +264,86 @@ class TestInputy(unittest.TestCase):
         """
         invalid_input_type = 'not_int_nor_float'
         with self.assertRaises(InvalidInputType) as e:
-            self.inputy(type=invalid_input_type)
+            self.inputy.format_input(type=invalid_input_type)
         self.assertEqual(e.exception.input_type, invalid_input_type)
+
+    def test_get_bool_options_case_insensitive(self):
+        """
+        Tests returning True for the insensitive value if 'i' is passed as
+        the first character of the 'options' parameter
+        """
+        options = 'i{y/n}'
+        insensitive, true_option, false_option = self.inputy.get_bool_options(options)
+
+        self.assertTrue(insensitive)
+        self.assertEqual(true_option, 'y')
+        self.assertEqual(false_option, 'n')
+
+    def test_get_bool_options_case_sensitive(self):
+        """
+        Tests returning True for the insensitive value if no 'i' is passed as
+        the first character of the 'options' parameter
+        """
+        options = 'y/n'
+        insensitive, true_option, false_option = self.inputy.get_bool_options(options)
+
+        self.assertFalse(insensitive)
+        self.assertEqual(true_option, 'y')
+        self.assertEqual(false_option, 'n')
+
+    def test_default_value_options(self):
+        """
+        Tests return the default 'True' and 'False' and case insensitive if no
+        options are passed
+        """
+        options = ''
+        insensitive, true_option, false_option = self.inputy.get_bool_options(options)
+
+        self.assertTrue(insensitive)
+        self.assertTrue(true_option)
+        self.assertFalse(false_option)
+
+    def test_passing_wrong_flag_for_case_insensitive(self):
+        """
+        Tests that passing a value different than 'i' for the insensitive
+        flag in in 'options' parameter when the type is bool, raises an exception
+        """
+        options = 'f{y/n}'
+        with self.assertRaises(BoolOptionsNotValid) as e:
+            self.inputy.get_bool_options(options)
+        self.assertEqual(e.exception.options, options)
+
+    def test_passing_invalid_options_to_bool_type(self):
+        """
+        Tests that passing an invalid option value to the parameter 'options'
+        raises an BoolOptionsNotValid
+        """
+        invalid_options = "jgnlf"
+        with self.assertRaises(BoolOptionsNotValid) as e:
+            self.inputy.get_bool_options(invalid_options)
+        self.assertEqual(e.exception.options, invalid_options)
+
+    def test_get_int_options(self):
+        """ Test returning valid options"""
+        positive = '+'
+        negative = '-'
+        int_options_positive = self.inputy.get_int_options(positive)
+        int_options_negative = self.inputy.get_int_options(negative)
+
+        self.assertEqual(positive, int_options_positive)
+        self.assertEqual(negative, int_options_negative)
+
+    def test_passing_long_character_as_int_options(self):
+        """
+        Tests that passing more than one character (only + or - are allowed)
+        raises an exception
+        """
+        long_int_options_one = '+-'
+        long_int_options_two = 'plus'
+
+        with self.assertRaises(IntOptionsNotValid) as e_one:
+            self.inputy.get_int_options(long_int_options_one)
+        with self.assertRaises(IntOptionsNotValid) as e_two:
+            self.inputy.get_int_options(long_int_options_two)
+        self.assertEqual(e_one.exception.options, long_int_options_one)
+        self.assertEqual(e_two.exception.options, long_int_options_two)
