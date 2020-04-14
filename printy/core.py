@@ -295,7 +295,7 @@ class Printy:
                     raise IntOptionsNotValid(int_options)
         return None
 
-    def check_boolean(self, value, bool_options):
+    def check_boolean(self, value, bool_options=None):
         """
         Validates the value when the type must be a boolean, returns a boolean
         specifying whether it is a valid value, and if it is, returns the final
@@ -321,7 +321,7 @@ class Printy:
             self.format(error_msg)
             return False, False
 
-    def check_integer(self, value, int_options):
+    def check_integer(self, value, int_options=None):
         """
         Validates the value when the type must be an integer, returns a boolean
         specifying whether it is a valid value, and if it is, returns the final
@@ -340,25 +340,24 @@ class Printy:
             )
         # Let's try to convert it to integer
         valid_value = False
-        if not isinstance(value, int):
-            try:
-                value = int(value)
-            except (ValueError, TypeError):
-                self.format(error_msg)
-            else:
-                if opt:
-                    if opt == '+' and value >= 0:
-                        valid_value = True
-                    elif opt == '-' and value < 0:
-                        valid_value = True
-                else:
-                    valid_value = True
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            self.format(error_msg)
         else:
-            valid_value = True
+            if opt:
+                if opt == '+' and value >= 0:
+                    valid_value = True
+                elif opt == '-' and value < 0:
+                    valid_value = True
+                else:
+                    valid_value = False
+            else:
+                valid_value = True
 
         return value, valid_value
 
-    def check_float(self, value, int_options):
+    def check_float(self, value, float_options=None):
         """
         Validates the value when the type must be an float, similar to integer check,
         but now it can have decimal digits, returns a boolean specifying whether it
@@ -366,7 +365,7 @@ class Printy:
         value (after conversions if necessary)
         """
         # Same integer options are allowed
-        opt = self.get_int_options(int_options)
+        opt = self.get_int_options(float_options)
         error_msg = (
             "%s is not a valid number" % value
         )
@@ -376,21 +375,20 @@ class Printy:
             )
         # Let's try to convert it to integer
         valid_value = False
-        if not isinstance(value, int):
-            try:
-                value = int(value)
-            except (ValueError, TypeError):
-                self.format(error_msg)
-            else:
-                if opt:
-                    if opt == '+' and value >= 0:
-                        valid_value = True
-                    elif opt == '-' and value < 0:
-                        valid_value = True
-                else:
-                    valid_value = True
+        try:
+            value = float(value)
+        except (ValueError, TypeError):
+            self.format(error_msg)
         else:
-            valid_value = True
+            if opt:
+                if opt == '+' and value >= 0:
+                    valid_value = True
+                elif opt == '-' and value < 0:
+                    valid_value = True
+                else:
+                    valid_value = False
+            else:
+                valid_value = True
 
         return value, valid_value
 
@@ -439,6 +437,9 @@ class Printy:
             # Prints out the message if any was passed
             result = str(input(self.get_formatted_text(*args, **kwargs)))
 
+            if result == '':
+                result = default
+
             if input_type == self.BOOL:
                 # now let's try to convert the value to a Boolean
                 result, valid_value = self.check_boolean(result, options)
@@ -450,19 +451,8 @@ class Printy:
             elif input_type == self.FLOAT:
                 # Almost the same for integer, but this time it just have to
                 # be a number, rounded or not
-                if not isinstance(result, (float, int)):
-                    try:
-                        result = float(result)
-                    except (ValueError, TypeError):
-                        self.format(
-                            "'[y]%s@' is not a valid number" % result
-                        )
-                    else:
-                        valid_value = True
-                else:
-                    valid_value = True
+                result, valid_value = self.check_float(result, options)
             else:
-                result = str(result)
-                valid_value = True
+                result, valid_value = str(result), True
 
         return result

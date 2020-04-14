@@ -185,6 +185,16 @@ class TestInlineFlagsPrinty(unittest.TestCase):
 
         self.assertEqual(inline_format, joined_global_format)
 
+    def test_read_file(self):
+        """ Test retrieving the text from a file """
+        text_in_file = 'printy'
+        file_name = 'printy_file'
+        with mock.patch('builtins.open', mock.mock_open(read_data=text_in_file)) as m:
+            result = self.printy.read_file(file_name)
+
+        m.assert_called_once_with(file_name)
+        self.assertEqual(result, text_in_file)
+
 
 class TestInputy(unittest.TestCase):
     """
@@ -202,70 +212,6 @@ class TestInputy(unittest.TestCase):
     int_valid_test = 23
     float_valid_test = 45.6
     bool_valid_test = False
-
-    @mock.patch('builtins.input', return_value=str_valid_test)
-    def test_passing_no_parameters_returns_a_value_str(self, mock_input):
-        """ Testing 'inputy' as a normal 'input()' function """
-        result_str = self.inputy.format_input()
-        self.assertEqual(result_str, self.str_valid_test)
-
-    @mock.patch('builtins.input', return_value=int_valid_test)
-    def test_passing_no_parameters_returns_a_value_str_from_int(self, mock_input):
-        """ Testing 'inputy' as a normal 'input()' function """
-        result_str_from_int = self.inputy.format_input()
-        self.assertEqual(result_str_from_int, str(self.int_valid_test))
-
-    @mock.patch('builtins.input', side_effect=[str_valid_test, bool_valid_test, float_valid_test, None, int_valid_test])
-    def test_passed_invalid_when_requested_int(self, mock_input):
-        """
-        Test that, when specifying the users has to enter an integer,
-        the message is prompted until a valid number is passed
-        """
-        result_valid_int = self.inputy.format_input(type='int')
-
-        self.assertEqual(result_valid_int, self.int_valid_test)
-
-    @mock.patch('builtins.input', side_effect=[None, str_valid_test, bool_valid_test, float_valid_test])
-    def test_passed_invalid_when_requested_float(self, mock_input):
-        """
-        Test that, when specifying the users has to enter a number,
-        the message is prompted until a valid number is passed
-        """
-        result_valid_int = self.inputy.format_input(type='float')
-
-        self.assertEqual(result_valid_int, self.float_valid_test)
-
-    @mock.patch('builtins.input', side_effect=[str_valid_test, None, int_valid_test, bool_valid_test])
-    def test_passed_invalid_when_requested_boolean(self, mock_input):
-        """
-        Test that, when specifying the user has to enter a boolean
-        the message is prompted until a boolean is passed
-        """
-        result_valid_boolean = self.inputy.format_input(type='bool')
-
-        self.assertEqual(result_valid_boolean, self.bool_valid_test)
-
-    @mock.patch('builtins.input', side_effect=[str_valid_test, None, int_valid_test, 'true'])
-    def test_passed_invalid_when_requested_boolean_str(self, mock_input):
-        """
-        Test that, when specifying the user has to enter a boolean
-        the message is prompted until a test case insensitive with the name of
-        one of the boolean values is passed
-        """
-        result_valid_boolean = self.inputy.format_input(type='bool')
-
-        self.assertEqual(result_valid_boolean, True)
-
-    @mock.patch('builtins.input', return_value=str_valid_test)
-    def test_passing_and_invalid_input_type(self, mock_input):
-        """
-        Tests that passing and invalid input type raises an InvalidInputType
-        exception. We mock the input() just in case the tests reaches that section
-        """
-        invalid_input_type = 'not_int_nor_float'
-        with self.assertRaises(InvalidInputType) as e:
-            self.inputy.format_input(type=invalid_input_type)
-        self.assertEqual(e.exception.input_type, invalid_input_type)
 
     def test_get_bool_options_case_insensitive(self):
         """
@@ -347,3 +293,210 @@ class TestInputy(unittest.TestCase):
             self.inputy.get_int_options(long_int_options_two)
         self.assertEqual(e_one.exception.options, long_int_options_one)
         self.assertEqual(e_two.exception.options, long_int_options_two)
+
+    def test_check_boolean_case_sensitive_returns_value_converted(self):
+        """
+        tests that passing a value (according to the options) to a type='bool'
+        returns a converted value (True or False)
+        """
+        options = 'y/n'
+        value_true = 'y'
+        value_false = 'n'
+        returned_value_true, valid_value_true = self.inputy.check_boolean(value_true, options)
+        returned_value_false, valid_value_false = self.inputy.check_boolean(value_false, options)
+
+        self.assertEqual(returned_value_true, True)
+        self.assertEqual(returned_value_false, False)
+        self.assertTrue(valid_value_true)
+        self.assertTrue(valid_value_false)
+
+    def test_check_boolean_case_insensitive_returns_value_converted(self):
+        """
+        tests that passing a value with different case (according to the options
+        as case insensitive) to a type='bool' returns a converted value (True or False)
+        """
+        options = 'i{y/n}'
+        value_true = 'Y'
+        value_false = 'N'
+        returned_value_true, valid_value_true = self.inputy.check_boolean(value_true, options)
+        returned_value_false, valid_value_false = self.inputy.check_boolean(value_false, options)
+
+        self.assertEqual(returned_value_true, True)
+        self.assertEqual(returned_value_false, False)
+        self.assertTrue(valid_value_true)
+        self.assertTrue(valid_value_false)
+
+    def test_check_boolean_invalid_value(self):
+        """
+        tests passing an invalid value to check_bool returns False as the value
+        and also False as 'valid_value'
+        """
+        options = 'i{y/n}'
+        value_true = 'Yes'
+        value_false = 'No'
+        returned_value_true, valid_value_true = self.inputy.check_boolean(value_true, options)
+        returned_value_false, valid_value_false = self.inputy.check_boolean(value_false, options)
+
+        self.assertEqual(returned_value_true, False)
+        self.assertEqual(returned_value_false, False)
+        self.assertFalse(valid_value_true)
+        self.assertFalse(valid_value_false)
+
+    def test_check_integer_returns_converted_value(self):
+        """ tests that check_integer returns the value converted as integer"""
+        value = 34
+        returned_value, valid_value = self.inputy.check_integer(value)
+
+        self.assertTrue(isinstance(returned_value, int))
+        self.assertEqual(returned_value, value)
+        self.assertTrue(valid_value)
+
+    def test_check_integer_with_positive_option(self):
+        """
+        Tests that passing '+' as options for type='int' returns the converted
+        value and valid_value as False if it is not a positive number
+        """
+        opts_positive = '+'
+        valid_int = 34
+        invalid_int = -34
+        return_valid_int, valid_value_valid_int = self.inputy.check_integer(valid_int, opts_positive)
+        return_invalid_int, valid_value_invalid_int = self.inputy.check_integer(invalid_int, opts_positive)
+
+        self.assertTrue(isinstance(return_valid_int, int))
+        self.assertEqual(return_valid_int, valid_int)
+        self.assertTrue(valid_value_valid_int)
+
+        self.assertTrue(isinstance(return_invalid_int, int))
+        self.assertEqual(return_invalid_int, invalid_int)
+        self.assertFalse(valid_value_invalid_int)
+
+    def test_check_integer_with_negative_option(self):
+        """
+        Tests that passing '-' as options for type='int' returns the converted
+        value and valid_value as False if it is not a negative number
+        """
+        opts_positive = '-'
+        valid_int = -34
+        invalid_int = 34
+        return_valid_int, valid_value_valid_int = self.inputy.check_integer(valid_int, opts_positive)
+        return_invalid_int, valid_value_invalid_int = self.inputy.check_integer(invalid_int, opts_positive)
+
+        self.assertTrue(isinstance(return_valid_int, int))
+        self.assertEqual(return_valid_int, valid_int)
+        self.assertTrue(valid_value_valid_int)
+
+        self.assertTrue(isinstance(return_invalid_int, int))
+        self.assertEqual(return_invalid_int, invalid_int)
+        self.assertFalse(valid_value_invalid_int)
+
+    def test_check_float_returns_converted_value(self):
+        """ tests that check_float returns the value converted as float"""
+        value = 34.5
+        returned_value, valid_value = self.inputy.check_float(value)
+
+        self.assertTrue(isinstance(returned_value, float))
+        self.assertEqual(returned_value, value)
+        self.assertTrue(valid_value)
+
+    def test_check_float_with_positive_option(self):
+        """
+        Tests that passing '+' as options for type='float' returns the converted
+        value and valid_value as False if it is not a positive number
+        """
+        opts_positive = '+'
+        valid_int = 34.5
+        invalid_int = -34.5
+        return_valid_int, valid_value_valid_int = self.inputy.check_float(valid_int, opts_positive)
+        return_invalid_int, valid_value_invalid_int = self.inputy.check_float(invalid_int, opts_positive)
+
+        self.assertTrue(isinstance(return_valid_int, float))
+        self.assertEqual(return_valid_int, valid_int)
+        self.assertTrue(valid_value_valid_int)
+
+        self.assertTrue(isinstance(return_invalid_int, float))
+        self.assertEqual(return_invalid_int, invalid_int)
+        self.assertFalse(valid_value_invalid_int)
+
+    def test_check_float_with_negative_option(self):
+        """
+        Tests that passing '-' as options for type='float' returns the converted
+        value and valid_value as False if it is not a negative number
+        """
+        opts_positive = '-'
+        valid_int = -34.0
+        invalid_int = 34.0
+        return_valid_int, valid_value_valid_int = self.inputy.check_float(valid_int, opts_positive)
+        return_invalid_int, valid_value_invalid_int = self.inputy.check_float(invalid_int, opts_positive)
+
+        self.assertTrue(isinstance(return_valid_int, float))
+        self.assertEqual(return_valid_int, valid_int)
+        self.assertTrue(valid_value_valid_int)
+
+        self.assertTrue(isinstance(return_invalid_int, float))
+        self.assertEqual(return_invalid_int, invalid_int)
+        self.assertFalse(valid_value_invalid_int)
+
+    @mock.patch('builtins.input', return_value=str_valid_test)
+    def test_passing_no_parameters_returns_a_value_str(self, mock_input):
+        """ Testing 'inputy' as a normal 'input()' function """
+        result_str = self.inputy.format_input()
+        self.assertEqual(result_str, self.str_valid_test)
+
+    @mock.patch('builtins.input', return_value=int_valid_test)
+    def test_passing_no_parameters_returns_a_value_str_from_int(self,
+                                                                mock_input):
+        """ Testing 'inputy' as a normal 'input()' function """
+        result_str_from_int = self.inputy.format_input()
+        self.assertEqual(result_str_from_int, str(self.int_valid_test))
+
+    @mock.patch('builtins.input', side_effect=[str_valid_test, bool_valid_test, float_valid_test, None, int_valid_test])
+    def test_passed_invalid_when_requested_int(self, mock_input):
+        """
+        Test that, when specifying the users has to enter an integer,
+        the message is prompted until a valid number is passed
+        """
+        result_valid_int = self.inputy.format_input(type='int')
+
+        self.assertEqual(result_valid_int, self.int_valid_test)
+
+    @mock.patch('builtins.input', side_effect=[None, str_valid_test, bool_valid_test, float_valid_test])
+    def test_passed_invalid_when_requested_float(self, mock_input):
+        """
+        Test that, when specifying the users has to enter a number,
+        the message is prompted until a valid number is passed
+        """
+        result_valid_int = self.inputy.format_input(type='float')
+
+        self.assertEqual(result_valid_int, self.float_valid_test)
+
+    @mock.patch('builtins.input', side_effect=[str_valid_test, None, int_valid_test, bool_valid_test])
+    def test_passed_invalid_when_requested_boolean(self, mock_input):
+        """
+        Test that, when specifying the user has to enter a boolean
+        the message is prompted until a boolean is passed
+        """
+        result_valid_boolean = self.inputy.format_input(type='bool')
+
+        self.assertEqual(result_valid_boolean, self.bool_valid_test)
+
+    @mock.patch('builtins.input', side_effect=[str_valid_test, None, int_valid_test, 'true'])
+    def test_passed_invalid_when_requested_boolean_str(self, mock_input):
+        """
+        Test that, when specifying the user has to enter a boolean
+        the message is prompted until a test case insensitive with the name of
+        one of the boolean values is passed
+        """
+        result_valid_boolean = self.inputy.format_input(type='bool')
+
+        self.assertEqual(result_valid_boolean, True)
+
+    @mock.patch('builtins.input', return_value=str_valid_test)
+    def test_passing_and_invalid_input_type(self, mock_input):
+        """
+        Tests that passing and invalid input type raises an InvalidInputType
+        exception. We mock the input() just in case the tests reaches that section
+        """
+        invalid_input_type = 'not_int_nor_float'
+        with self.assertRaises(InvalidInputType) as e:
+            self.inputy.format_input(type=invalid_input_type)
+        self.assertEqual(e.exception.input_type, invalid_input_type)
