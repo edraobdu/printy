@@ -1,0 +1,25 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "mihirs16",
+      "name": "Mihir Singh",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/44063783?v=4",
+      "profile": "https://github.com/mihirs16",
+      "contributions": [
+        "test",
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "printy",
+  "projectOwner": "edraobdu",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
