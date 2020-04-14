@@ -1,10 +1,11 @@
 # Printy
 
-[![Build Status](https://travis-ci.org/edraobdu/printy.svg?branch=master)](https://travis-ci.org/edraobdu/printy) 
-![PyPI](https://img.shields.io/pypi/v/printy) 
+![Travis (.org)](https://img.shields.io/travis/edraobdu/printy?logo=travis) 
+![Codecov](https://img.shields.io/codecov/c/gh/edraobdu/printy?logo=codecov)
+![PyPI](https://img.shields.io/pypi/v/printy)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/printy)
+![PyPI - Wheel](https://img.shields.io/pypi/wheel/printy)
 ![PyPI - License](https://img.shields.io/pypi/l/printy)
-![Codecov](https://img.shields.io/codecov/c/gh/edraobdu/printy)
-
 
 Printy lets you colorize and apply some standard formats to your text with
 an intuitive and friendly API based on flags to specify the formats. You can
