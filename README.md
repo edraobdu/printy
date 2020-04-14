@@ -1,6 +1,6 @@
 # Printy
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ![Travis (.org)](https://img.shields.io/travis/edraobdu/printy?logo=travis) 
@@ -125,6 +125,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <table>
   <tr>
     <td align="center"><a href="https://github.com/mihirs16"><img src="https://avatars3.githubusercontent.com/u/44063783?v=4" width="100px;" alt=""/><br /><sub><b>Mihir Singh</b></sub></a><br /><a href="https://github.com/edraobdu/printy/commits?author=mihirs16" title="Tests">⚠️</a> <a href="https://github.com/edraobdu/printy/commits?author=mihirs16" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/farahduk"><img src="https://avatars3.githubusercontent.com/u/15660335?v=4" width="100px;" alt=""/><br /><sub><b>farahduk</b></sub></a><br /><a href="#ideas-farahduk" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/edraobdu/printy/commits?author=farahduk" title="Code">💻</a> <a href="#maintenance-farahduk" title="Maintenance">🚧</a></td>
   </tr>
 </table>
 
