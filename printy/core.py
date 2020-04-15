@@ -266,7 +266,10 @@ class Printy:
         """
         insensitive, true_value, false_value = True, True, False
         if bool_options:
-            opts = list(bool_options.replace('{', '').replace('}', '').replace('/', ''))
+            opts = bool_options.replace('{', '-').replace('}', '-').replace('/', '-')
+            opts = opts.split('-')
+            if '' in opts:
+                opts.remove('')
             # It might end up with 2 or 3 values, if its 3, the first one must be
             # the case insensitive indicator 'i'
             if len(opts) == 3 and opts[0] != 'i':
