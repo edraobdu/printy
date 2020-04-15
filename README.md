@@ -3,8 +3,8 @@
 ![Travis (.org)](https://img.shields.io/travis/edraobdu/printy?logo=travis&style=flat-square) 
 ![Codecov](https://img.shields.io/codecov/c/gh/edraobdu/printy?logo=codecov&style=flat-square)
 ![PyPI](https://img.shields.io/pypi/v/printy?style=flat-square)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/printy?style=flat-square)
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/printy?style=flat-square)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/printy?logo=python&logoColor=blue&style=flat-square)
 [![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
 ![PyPI - License](https://img.shields.io/pypi/l/printy?style=flat-square)
 
@@ -32,6 +32,8 @@ command:
 from printy import helpme
 ```
 This will print out some instructions right away.
+
+![Printy Helpme](github/printy_helpme.png)
  
 ##### Using global flags
 
@@ -44,11 +46,16 @@ Printy is still a 'print' statement, so you can use it as it is:
 ```python
 printy("text with no format")
 ```
+![Printy No Format](github/printy_no_format.png)
+
 You can use a global set of flags to specify a format you want to apply to the text,
 let's say we want to colorize a text with a bold blue and also adding an underline:
 ```python
 printy("Text with a bold blue color and underlined", 'bBU')
 ```
+
+![Printy Bold Blue Underlined](github/printy_blue_bold_underline.png)
+
 ##### Using inline format
 Although applying a global format is interesting, it is not as much as applying
 some specific format to some section of the text only. For that, printy uses a 
@@ -58,6 +65,9 @@ section:
 ```python
 printy("Predefined format [rI]This is red and with italic style@ also predefined format")
 ```
+
+![Printy Predefined and Red italic](github/printy_predefined_red_italic.png)
+
 The text that is not surrounded by the format syntax will remain with the predefined 
 format.
 
@@ -66,10 +76,15 @@ in the 'predefined' parameter
 ```python
 printy("Now this is blue [rI]Still red italic@ and also blue", predefined="b")
 ```
+
+![Printy predefined blue red italic](github/printy_predefined_blue_red_italic.png)
+
 Or, you can override the whole format without changing the inline format with a global flag:
 ```python
 printy("Now i am still blue, [rI]and also me@, and me as well ", "b")
 ```
+
+![Printy override inline format](github/printy_override_inline_format.png)
 
 Printy also supports reading from a file, just pass the path to your file
 in the file parameter:
@@ -79,6 +94,9 @@ in the file parameter:
 # in the 'flags' parameter
 printy(file="/path/to/your/file/file.extension", flags="cU")
 ```
+| Inline Format | Global Format|
+| --- | --- |
+| ![Printy file inline format ](github/printy_open_file_no_global_format.png) | ![Printy file global format ](github/printy_open_file_global_format.png) |
 
 ## What about input()?
 
@@ -96,9 +114,12 @@ a = inputy("How many apples do you want?", "rB", type="int")
 b = inputy("How many [rB]apples@ did you get?", type="int")
 c = inputy("Are you happy with that?", type="bool")
 ```
+
 In all of the above examples, if the user enters a value with a type other than 
 the one specified in 'type', the message will show again and will prompt also a warning 
 (and so on until the user enters a valid value according to the type)
+
+![Printy inputy positive int](github/printy_inputy_int.png)
 
 Also, you can specify if, for the integer type for example, the value must
 be a positive integer or a negative:
@@ -107,13 +128,14 @@ be a positive integer or a negative:
 a = inputy("How many apples do you want?", "rB", type="int", options="+")
 # ...
 ```
-
 or for the boolean type:
 
 ```python
 # ...
 c = inputy("Are you happy with that?", type="bool", options="i{y/n}")
 ```
+
+![Printy inputy positive int and bool](github/printy_inputy_positive_int_and_bool.png)
 
 That will indicate that the affirmative value to be entered would be 'y'
 or 'Y' (the 'i' at the beginning indicates 'case insensitive'), and the non
@@ -126,6 +148,8 @@ case insensitive.*
 **The best part** is that the returned value's type is also the one of the specified 
 type, therefore, from the above examples, both *a* and *b* will be integers, and
 *c* will be a boolean, so, you're gonna get the information right as you need it.   
+
+![Printy inputy results](github/printy_inputy_results.png)
 
 The current supported types are:
 
@@ -161,9 +185,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="https://github.com/mihirs16"><img src="https://avatars3.githubusercontent.com/u/44063783?v=4" width="100px;" alt=""/><br /><sub><b>Mihir Singh</b></sub></a><br /><a href="https://github.com/edraobdu/printy/commits?author=mihirs16" title="Tests">⚠️</a> <a href="https://github.com/edraobdu/printy/commits?author=mihirs16" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/edraobdu"><img src="https://avatars3.githubusercontent.com/u/31775663?v=4" width="100px;" alt=""/><br /><sub><b>Edgardo Obregón</b></sub></a><br /><a href="https://github.com/edraobdu/printy/commits?author=edraobdu" title="Code">💻</a> <a href="https://github.com/edraobdu/printy/commits?author=edraobdu" title="Tests">⚠️</a> <a href="#example-edraobdu" title="Examples">💡</a> <a href="#ideas-edraobdu" title="Ideas, Planning, & Feedback">🤔</a> <a href="#maintenance-edraobdu" title="Maintenance">🚧</a> <a href="https://github.com/edraobdu/printy/commits?author=edraobdu" title="Documentation">📖</a> <a href="https://github.com/edraobdu/printy/issues?q=author%3Aedraobdu" title="Bug reports">🐛</a></td>    
     <td align="center"><a href="https://github.com/farahduk"><img src="https://avatars3.githubusercontent.com/u/15660335?v=4" width="100px;" alt=""/><br /><sub><b>farahduk</b></sub></a><br /><a href="#ideas-farahduk" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/edraobdu/printy/commits?author=farahduk" title="Code">💻</a> <a href="#maintenance-farahduk" title="Maintenance">🚧</a></td>
-    <td align="center"><a href="https://github.com/edraobdu"><img src="https://avatars3.githubusercontent.com/u/31775663?v=4" width="100px;" alt=""/><br /><sub><b>Edgardo Obregón</b></sub></a><br /><a href="https://github.com/edraobdu/printy/commits?author=edraobdu" title="Code">💻</a> <a href="https://github.com/edraobdu/printy/commits?author=edraobdu" title="Tests">⚠️</a> <a href="#example-edraobdu" title="Examples">💡</a> <a href="#ideas-edraobdu" title="Ideas, Planning, & Feedback">🤔</a> <a href="#maintenance-edraobdu" title="Maintenance">🚧</a> <a href="https://github.com/edraobdu/printy/commits?author=edraobdu" title="Documentation">📖</a> <a href="https://github.com/edraobdu/printy/issues?q=author%3Aedraobdu" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/mihirs16"><img src="https://avatars3.githubusercontent.com/u/44063783?v=4" width="100px;" alt=""/><br /><sub><b>Mihir Singh</b></sub></a><br /><a href="https://github.com/edraobdu/printy/commits?author=mihirs16" title="Tests">⚠️</a> <a href="https://github.com/edraobdu/printy/commits?author=mihirs16" title="Code">💻</a></td>
     <td align="center"><a href="https://soundcloud.com/lalalaaalala"><img src="https://avatars1.githubusercontent.com/u/7810348?v=4" width="100px;" alt=""/><br /><sub><b>musicprogram</b></sub></a><br /><a href="#userTesting-musicprogram" title="User Testing">📓</a></td>
   </tr>
 </table>

@@ -4,16 +4,20 @@
   ],
   "imageSize": 100,
   "commit": false,
-  "badgeTemplate": "[![All Contributors](https://img.shields.io/badge/all_contributors-<%=contributors.length%>-orange.svg?style=flat-square)](#contributors)",
   "contributors": [
     {
-      "login": "mihirs16",
-      "name": "Mihir Singh",
-      "avatar_url": "https://avatars3.githubusercontent.com/u/44063783?v=4",
-      "profile": "https://github.com/mihirs16",
+      "login": "edraobdu",
+      "name": "Edgardo Obregón",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/31775663?v=4",
+      "profile": "https://github.com/edraobdu",
       "contributions": [
+        "code",
         "test",
-        "code"
+        "example",
+        "ideas",
+        "maintenance",
+        "doc",
+        "bug"
       ]
     },
     {
@@ -28,18 +32,13 @@
       ]
     },
     {
-      "login": "edraobdu",
-      "name": "Edgardo Obregón",
-      "avatar_url": "https://avatars3.githubusercontent.com/u/31775663?v=4",
-      "profile": "https://github.com/edraobdu",
+      "login": "mihirs16",
+      "name": "Mihir Singh",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/44063783?v=4",
+      "profile": "https://github.com/mihirs16",
       "contributions": [
-        "code",
         "test",
-        "example",
-        "ideas",
-        "maintenance",
-        "doc",
-        "bug"
+        "code"
       ]
     },
     {
