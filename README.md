@@ -86,6 +86,13 @@ printy("Now i am still blue, [rI]and also me@, and me as well ", "b")
 
 ![Printy override inline format](github/printy_override_inline_format.png)
 
+You can combine it with f-strings:
+```python
+a = 60
+printy(f"The day has [yB]{ 24 * a }@ minutes")
+```
+![Printy F Strings](github/printy_f_strings.png)
+
 Printy also supports reading from a file, just pass the path to your file
 in the file parameter:
 
