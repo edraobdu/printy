@@ -25,7 +25,7 @@
         "ideas",
         "code",
         "maintenance"
-       ]
+      ]
     },
     {
       "login": "edraobdu",
@@ -40,6 +40,15 @@
         "maintenance",
         "doc",
         "bug"
+      ]
+    },
+    {
+      "login": "musicprogram",
+      "name": "musicprogram",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/7810348?v=4",
+      "profile": "https://soundcloud.com/lalalaaalala",
+      "contributions": [
+        "userTesting"
       ]
     }
   ],
