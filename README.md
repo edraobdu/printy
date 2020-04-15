@@ -1,12 +1,12 @@
 # Printy
 
-![Travis (.org)](https://img.shields.io/travis/edraobdu/printy?logo=travis) 
-![Codecov](https://img.shields.io/codecov/c/gh/edraobdu/printy?logo=codecov)
-![PyPI](https://img.shields.io/pypi/v/printy)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/printy)
-![PyPI - Wheel](https://img.shields.io/pypi/wheel/printy)
-[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat)](#contributors-)
-![PyPI - License](https://img.shields.io/pypi/l/printy)
+![Travis (.org)](https://img.shields.io/travis/edraobdu/printy?logo=travis&style=flat-square) 
+![Codecov](https://img.shields.io/codecov/c/gh/edraobdu/printy?logo=codecov&style=flat-square)
+![PyPI](https://img.shields.io/pypi/v/printy?style=flat-square)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/printy?style=flat-square)
+![PyPI - Wheel](https://img.shields.io/pypi/wheel/printy?style=flat-square)
+[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
+![PyPI - License](https://img.shields.io/pypi/l/printy?style=flat-square)
 
 Printy is a **cross-platform** that lets you colorize and apply some standard formats 
 to your text with an intuitive and friendly API based on **flags**. You can
