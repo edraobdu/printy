@@ -14,7 +14,7 @@ either apply a global format or inline formats to specific parts of your text, a
 some other interesting functionalities!
 
 
-![Printy Demo](github/printy_demo.gif)
+![Printy Demo](.github/printy_demo.gif)
 
 
 ## Installation
@@ -33,7 +33,7 @@ from printy import helpme
 ```
 This will print out some instructions right away.
 
-![Printy Helpme](github/printy_helpme.png)
+![Printy Helpme](.github/printy_helpme.png)
  
 ##### Using global flags
 
@@ -46,7 +46,7 @@ Printy is still a 'print' statement, so you can use it as it is:
 ```python
 printy("text with no format")
 ```
-![Printy No Format](github/printy_no_format.png)
+![Printy No Format](.github/printy_no_format.png)
 
 You can use a global set of flags to specify a format you want to apply to the text,
 let's say we want to colorize a text with a bold blue and also adding an underline:
@@ -54,7 +54,7 @@ let's say we want to colorize a text with a bold blue and also adding an underli
 printy("Text with a bold blue color and underlined", 'bBU')
 ```
 
-![Printy Bold Blue Underlined](github/printy_blue_bold_underline.png)
+![Printy Bold Blue Underlined](.github/printy_blue_bold_underline.png)
 
 ##### Using inline format
 Although applying a global format is interesting, it is not as much as applying
@@ -66,7 +66,7 @@ section:
 printy("Predefined format [rI]This is red and with italic style@ also predefined format")
 ```
 
-![Printy Predefined and Red italic](github/printy_predefined_red_italic.png)
+![Printy Predefined and Red italic](.github/printy_predefined_red_italic.png)
 
 The text that is not surrounded by the format syntax will remain with the predefined 
 format.
@@ -77,21 +77,21 @@ in the 'predefined' parameter
 printy("Now this is blue [rI]Still red italic@ and also blue", predefined="b")
 ```
 
-![Printy predefined blue red italic](github/printy_predefined_blue_red_italic.png)
+![Printy predefined blue red italic](.github/printy_predefined_blue_red_italic.png)
 
 Or, you can override the whole format without changing the inline format with a global flag:
 ```python
 printy("Now i am still blue, [rI]and also me@, and me as well ", "b")
 ```
 
-![Printy override inline format](github/printy_override_inline_format.png)
+![Printy override inline format](.github/printy_override_inline_format.png)
 
 You can combine it with f-strings:
 ```python
 a = 60
 printy(f"The day has [yB]{ 24 * a }@ minutes")
 ```
-![Printy F Strings](github/printy_f_strings.png)
+![Printy F Strings](.github/printy_f_strings.png)
 
 Printy also supports reading from a file, just pass the path to your file
 in the file parameter:
@@ -103,7 +103,7 @@ printy(file="/path/to/your/file/file.extension", flags="cU")
 ```
 | Inline Format | Global Format|
 | --- | --- |
-| ![Printy file inline format ](github/printy_open_file_no_global_format.png) | ![Printy file global format ](github/printy_open_file_global_format.png) |
+| ![Printy file inline format ](.github/printy_open_file_no_global_format.png) | ![Printy file global format ](.github/printy_open_file_global_format.png) |
 
 ## What about input()?
 
@@ -126,7 +126,7 @@ In all of the above examples, if the user enters a value with a type other than
 the one specified in 'type', the message will show again and will prompt also a warning 
 (and so on until the user enters a valid value according to the type)
 
-![Printy inputy positive int](github/printy_inputy_int.png)
+![Printy inputy positive int](.github/printy_inputy_int.png)
 
 Also, you can specify if, for the integer type for example, the value must
 be a positive integer or a negative:
@@ -142,7 +142,7 @@ or for the boolean type:
 c = inputy("Are you happy with that?", type="bool", options="i{y/n}")
 ```
 
-![Printy inputy positive int and bool](github/printy_inputy_positive_int_and_bool.png)
+![Printy inputy positive int and bool](.github/printy_inputy_positive_int_and_bool.png)
 
 That will indicate that the affirmative value to be entered would be 'y'
 or 'Y' (the 'i' at the beginning indicates 'case insensitive'), and the non
@@ -156,7 +156,7 @@ case insensitive.*
 type, therefore, from the above examples, both *a* and *b* will be integers, and
 *c* will be a boolean, so, you're gonna get the information right as you need it.   
 
-![Printy inputy results](github/printy_inputy_results.png)
+![Printy inputy results](.github/printy_inputy_results.png)
 
 The current supported types are:
 
