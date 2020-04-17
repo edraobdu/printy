@@ -1,3 +1,12 @@
+"""
+This module will contain the patters specific for the Python programming
+language, like key words and some other patters that determine whether the text
+must be colored or not, or if we should start a block where some other patterns
+must be taken into account, and what other must not, like, e.g, only within a
+class definition the special words 'self' and 'cls' and some methods like
+__init__ or __str__ have a special meaning and therefore they should be colored.
+"""
+
 # Defines the patterns that represent keywords to be highlighted by the language
 # and the color to be used represented by a flag
 key_words_flag = 'r'
@@ -64,9 +73,7 @@ GLOBAL_PATTERNS = {
 
     ### Other paters
 
-    # Decorator, this will catch the decorator until the next
-    # white space is reached
-    '@': decorator_flag,
+    # Decorator
     # f-strings
     'f\'': string_flag,
     'f\"': string_flag,
@@ -157,7 +164,7 @@ def define_pattern(char, remaining_text, in_class):
                 if new_pattern not in GLOBAL_PATTERNS.keys():
                     continue
                 else:
-                    # Now, we need to know how we nned to proceed, let's start
+                    # Now, we need to know how we need to proceed, let's start
                     # with Inline comments
                     # For inline comments, the block finishes when a new
                     # line-brake is made
