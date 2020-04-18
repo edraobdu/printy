@@ -61,7 +61,7 @@ class Printy:
         return False
 
     @classmethod
-    def _define_char(cls, prev, current):
+    def _define_char(cls, prev: str, current: str) -> bool:
         """
         Helper method that'll tell us if a character has to be treated as a
         special one or it is part of the text that 's intended to be printed
@@ -79,7 +79,7 @@ class Printy:
         return False
 
     @classmethod
-    def _check_special_char_position(cls, last_special, special):
+    def _check_special_char_position(cls, last_special: str, special: str) -> str:
         """
         Returns an action to execute if the character is well placed. It should
         only be applied over special characters.
@@ -108,14 +108,14 @@ class Printy:
                 return cls.END_FORMAT
 
     @classmethod
-    def _replace_escaped(cls, text):
+    def _replace_escaped(cls, text: str) -> str:
         """ Replaces escaped special characters for the character itself """
         for special_char in cls.special_chars:
             text = text.replace('\\' + special_char, special_char)
         return text
 
     @classmethod
-    def _get_inline_format_as_tuple(cls, text):
+    def _get_inline_format_as_tuple(cls, text: str) -> list:
         """
         In case some inline formats have been applied we need to get a list of
         tuples indicating the formats to be applied via flags and the text
@@ -183,12 +183,12 @@ class Printy:
         return list_of_formats
 
     @classmethod
-    def _get_cleaned_text(cls, text):
+    def _get_cleaned_text(cls, text: str) -> str:
         """ Returns the cleaned value, with no formats """
         tuple_text = cls._get_inline_format_as_tuple(text)
         return cls._replace_escaped(''.join(x[0] for x in tuple_text))
 
-    def get_formatted_text(self, value, flags=None, predefined=None):
+    def get_formatted_text(self, value: str, flags='', predefined='') -> str:
         """
         Applies the format specified by the 'flags' to the 'value'.
 
@@ -223,14 +223,14 @@ class Printy:
         return text
 
     @staticmethod
-    def read_file(file):
+    def read_file(file: str) -> str:
         """ Given a file path, we read it and print it out """
         file = str(file)
         with open(file) as f:
             text = f.read()
         return text
 
-    def format(self, value='', flags=None, predefined=None, file='', end=default_end):
+    def format(self, value='', flags='', predefined='', file='', end=default_end):
         """ Prints out the value """
         value = self.read_file(file) if file else value
         print(self.get_formatted_text(value, flags, predefined), end=end)
@@ -243,18 +243,6 @@ class Printy:
     FLOAT = 'float'
     STR = 'str'
     types = [BOOL, INT, FLOAT, STR]
-
-    @staticmethod
-    def construct_end_line(*args, **kwargs):
-        """
-        For inputy, given certain parameters we can create a probable end of
-        line, this is, a helper message for the user, in case we set, for
-        example, if we set that the value must be an integer, we could add
-        that information to the end user.
-        """
-        end = kwargs.get('end', default_end)
-        value_type = kwargs.get('end', None)
-        pass
 
     @staticmethod
     def get_bool_options(bool_options):
