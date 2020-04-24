@@ -5,6 +5,7 @@ from .exceptions import (
     IntOptionsNotValid, FloatOptionsNotValid
 )
 from .flags import Flags
+from . import syntax as highlight_syntax
 
 LINUX = 'Linux'
 WINDOWS = 'Windows'
@@ -188,7 +189,7 @@ class Printy:
         tuple_text = cls._get_inline_format_as_tuple(text)
         return cls._replace_escaped(''.join(x[0] for x in tuple_text))
 
-    def get_formatted_text(self, value: str, flags='', predefined='') -> str:
+    def get_formatted_text(self, value: str, flags='', predefined='', syntax='') -> str:
         """
         Applies the format specified by the 'flags' to the 'value'.
 
@@ -206,7 +207,24 @@ class Printy:
                     Flags.get_end_of_line()
                 )
             else:
-                tuple_text = self._get_inline_format_as_tuple(value)
+                if syntax:
+                    syntax_lang = getattr(highlight_syntax, syntax, None)
+                    if syntax_lang:
+                        from importlib import import_module
+                        try:
+                            syntax_module = import_module('printy.syntax.%s.patterns' % syntax_lang)
+                        except ImportError:
+                            syntax_module = None
+
+                        if syntax_module:
+                            tuple_text = syntax_module.get_syntax_as_tuples(value)
+                        else:
+                            raise TypeError("%s syntax is not supported" % syntax)
+                    else:
+                        raise TypeError("%s syntax is not supported" % syntax)
+                else:
+                    tuple_text = self._get_inline_format_as_tuple(value)
+
                 text = ''
                 for section in tuple_text:
                     section_text = self._replace_escaped(section[0])
@@ -230,10 +248,10 @@ class Printy:
             text = f.read()
         return text
 
-    def format(self, value='', flags='', predefined='', file='', end=default_end):
+    def format(self, value='', flags='', predefined='', syntax='', file='', end=default_end):
         """ Prints out the value """
         value = self.read_file(file) if file else value
-        print(self.get_formatted_text(value, flags, predefined), end=end)
+        print(self.get_formatted_text(value, flags, predefined, syntax), end=end)
 
     ##### Inputy
 
