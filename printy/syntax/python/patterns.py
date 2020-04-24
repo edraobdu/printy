@@ -247,6 +247,7 @@ def check_potential_pattern(remaining_text: str, block: str) -> tuple:
 
     # Only for strings and block comments
     quotes_at_the_beginning = ''
+
     if block == LINE_COMMENT_BLOCK:
         # Then this pattern will end only when a line break is found
         try:
@@ -254,14 +255,30 @@ def check_potential_pattern(remaining_text: str, block: str) -> tuple:
         except ValueError:
             # In case it is at the end of the string and no '\n' is found
             winner_index = None
+
     elif block == REGULAR_STRING:
         remaining_text = remaining_text[1:]
         quotes_at_the_beginning = first_char
-        winner_index = remaining_text.index(first_char) + 1
+
+        # Let's try to detect if the quote is a escaped one or if
+        # it is the end of the string
+        # get the index of the 'ending' quote
+        winner_index = remaining_text.index(first_char)
+        # get the previous character
+        escape_quote = remaining_text[winner_index - 1]
+        while escape_quote == '\\':
+            # if its the escape character, then we keep adding the index
+            # (+ 1 because indexes starts at 0) to the winner_index
+            winner_index += remaining_text[winner_index + 1:].index(first_char) + 1
+            escape_quote = remaining_text[winner_index - 1]
+        # the next character after the match
+        winner_index += 1
+
     elif block == BLOCK_COMMENT_BLOCK:
         remaining_text = remaining_text[3:]
         quotes_at_the_beginning = first_three_chars
         winner_index = remaining_text.index(first_three_chars) + 3
+
     else:
         for c in WE_FOUND_A_PATTERN:
             try:
@@ -289,24 +306,29 @@ def check_potential_pattern(remaining_text: str, block: str) -> tuple:
         if white_space_at_the_beginning:
             pattern = ' ' + pattern
         remaining_text = remaining_text[winner_index:] if remaining_text else ''
+
     elif block == LINE_COMMENT_BLOCK:
         block = None
         flags = line_comment_flag
         remaining_text = remaining_text[winner_index:] if remaining_text else ''
+
     elif block == BLOCK_COMMENT_BLOCK:
         block = None
         flags = block_comment_flag
         pattern = quotes_at_the_beginning + pattern
         remaining_text = remaining_text[winner_index:] if remaining_text else ''
+
     elif block == REGULAR_STRING:
         block = None
         flags = string_flag
         pattern = quotes_at_the_beginning + pattern
         remaining_text = remaining_text[winner_index:] if remaining_text else ''
+
     elif block == NUMBER_BLOCK:
         block = None
         flags = number_flag
         remaining_text = remaining_text[winner_index:] if remaining_text else ''
+
     else:
         if pattern not in GLOBAL_PATTERNS.keys():
             if block != CLASS_BLOCK:

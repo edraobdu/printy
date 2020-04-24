@@ -9,6 +9,6 @@
 py = 'python'
 
 # not available
-html = 'html'
-js = 'javascript'
-css = 'css'
+# html = 'html'
+# js = 'javascript'
+# css = 'css'
