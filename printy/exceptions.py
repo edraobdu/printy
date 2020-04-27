@@ -22,26 +22,3 @@ class InvalidInputType(Exception):
 
     def __str__(self):
         return "'%s' is not a valid type" % self.input_type
-
-
-class OptionsNotValid(Exception):
-    """ Raises when the options for the inputy function is wrong written """
-
-    def __init__(self, options):
-        self.options = options
-
-    def __str__(self):
-        return "'%s' is not a valid value for the 'options' parameter" \
-               ", please check its structure" % self.options
-
-
-class BoolOptionsNotValid(OptionsNotValid):
-    pass
-
-
-class IntOptionsNotValid(OptionsNotValid):
-    pass
-
-
-class FloatOptionsNotValid(OptionsNotValid):
-    pass

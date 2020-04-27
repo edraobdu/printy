@@ -127,14 +127,3 @@ class Flags:
                 if hasattr(cls, available_flags[flag]):
                     flags_values.append(getattr(cls, available_flags[flag])[1])
         return flags_values
-
-    @classmethod
-    def get_formatted_text(cls, value, flags):
-        if flags:
-            return "%s%s%s" % (
-                cls.join_flags(cls.get_flag_values(flags)),
-                value,
-                cls.get_end_of_line()
-            )
-        return value
-

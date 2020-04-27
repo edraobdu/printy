@@ -10,7 +10,7 @@ to the data the final user is entering by the console
 from .core import Printy
 from .flags import Flags
 
-__version__ = "1.2.1"
+__version__ = "2.0.0"
 
 __all__ = ['raw_format', 'printy', 'inputy', 'COLORS', 'FORMATS']
 
