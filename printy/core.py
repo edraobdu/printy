@@ -1,9 +1,6 @@
 import platform
 
-from .exceptions import (
-    InvalidInputType, BoolOptionsNotValid,
-    IntOptionsNotValid, FloatOptionsNotValid
-)
+from .exceptions import InvalidInputType
 from .flags import Flags
 
 LINUX = 'Linux'
@@ -61,7 +58,7 @@ class Printy:
         return False
 
     @classmethod
-    def _define_char(cls, prev, current):
+    def _define_char(cls, prev: str, current: str) -> bool:
         """
         Helper method that'll tell us if a character has to be treated as a
         special one or it is part of the text that 's intended to be printed
@@ -79,7 +76,9 @@ class Printy:
         return False
 
     @classmethod
-    def _check_special_char_position(cls, last_special, special):
+    def _check_special_char_position(cls, last_special: str,
+                                     special: str) -> str:
+
         """
         Returns an action to execute if the character is well placed. It should
         only be applied over special characters.
@@ -108,14 +107,14 @@ class Printy:
                 return cls.END_FORMAT
 
     @classmethod
-    def _replace_escaped(cls, text):
+    def _replace_escaped(cls, text: str) -> str:
         """ Replaces escaped special characters for the character itself """
         for special_char in cls.special_chars:
             text = text.replace('\\' + special_char, special_char)
         return text
 
     @classmethod
-    def _get_inline_format_as_tuple(cls, text):
+    def _get_inline_format_as_tuple(cls, text: str) -> list:
         """
         In case some inline formats have been applied we need to get a list of
         tuples indicating the formats to be applied via flags and the text
@@ -140,7 +139,8 @@ class Printy:
         for char in text:
             is_special = cls._define_char(prev, char)
             if is_special:
-                action = cls._check_special_char_position(last_special_char, char)
+                action = cls._check_special_char_position(last_special_char,
+                                                          char)
 
                 if action == cls.ESCAPE_CHAR:
                     # Add the character to the text
@@ -183,12 +183,13 @@ class Printy:
         return list_of_formats
 
     @classmethod
-    def _get_cleaned_text(cls, text):
+    def _get_cleaned_text(cls, text: str) -> str:
         """ Returns the cleaned value, with no formats """
         tuple_text = cls._get_inline_format_as_tuple(text)
         return cls._replace_escaped(''.join(x[0] for x in tuple_text))
 
-    def get_formatted_text(self, value, flags=None, predefined=None):
+    def get_formatted_text(self, value: str, flags='', predefined='',
+                           **kwargs) -> str:
         """
         Applies the format specified by the 'flags' to the 'value'.
 
@@ -223,19 +224,20 @@ class Printy:
         return text
 
     @staticmethod
-    def read_file(file):
+    def read_file(file: str) -> str:
         """ Given a file path, we read it and print it out """
         file = str(file)
         with open(file) as f:
             text = f.read()
         return text
 
-    def format(self, value='', flags=None, predefined=None, file='', end=default_end):
+    def format(self, value='', flags='', predefined='', file='',
+               end=default_end):
         """ Prints out the value """
         value = self.read_file(file) if file else value
         print(self.get_formatted_text(value, flags, predefined), end=end)
 
-    ##### Inputy
+    ##### ============= INPUTY ======================
 
     # Types (str is the default)
     BOOL = 'bool'
@@ -244,78 +246,24 @@ class Printy:
     STR = 'str'
     types = [BOOL, INT, FLOAT, STR]
 
-    @staticmethod
-    def construct_end_line(*args, **kwargs):
-        """
-        For inputy, given certain parameters we can create a probable end of
-        line, this is, a helper message for the user, in case we set, for
-        example, if we set that the value must be an integer, we could add
-        that information to the end user.
-        """
-        end = kwargs.get('end', default_end)
-        value_type = kwargs.get('end', None)
-        pass
-
-    @staticmethod
-    def get_bool_options(bool_options):
-        """
-        Strips the string passed as bool_options and returns the valid values,
-        let's say the bool_options = 'i{Y/n}', then it will return a tuple
-        containing:
-            insensitive, true, false = True, 'Y', 'n'
-        """
-        insensitive, true_value, false_value = True, True, False
-        if bool_options:
-            opts = bool_options.replace('{', '-').replace('}', '-').replace('/', '-')
-            opts = opts.split('-')
-            if '' in opts:
-                opts.remove('')
-            # It might end up with 2 or 3 values, if its 3, the first one must be
-            # the case insensitive indicator 'i'
-            if len(opts) == 3 and opts[0] != 'i':
-                raise BoolOptionsNotValid(bool_options)
-            elif len(opts) > 3 or len(opts) <= 1:
-                raise BoolOptionsNotValid(bool_options)
-            elif len(opts) == 3:
-                insensitive, true_value, false_value = True, opts[1], opts[2]
-            else:
-                true_value, false_value = opts
-                insensitive = False
-
-        return insensitive, true_value, false_value
-
-    @staticmethod
-    def get_int_options(int_options):
-        """ Checks that only '+' or '-' are passed """
-        # the default is None, which will accept any number, positive or negative
-        if int_options:
-            if len(int_options) > 1:
-                raise IntOptionsNotValid(int_options)
-            else:
-                if int_options in ('+', '-'):
-                    return int_options
-                else:
-                    raise IntOptionsNotValid(int_options)
-        return None
-
-    def check_boolean(self, value, bool_options=None):
+    def check_boolean(self, value: str, options: dict, condition: str) -> tuple:
         """
         Validates the value when the type must be a boolean, returns a boolean
         specifying whether it is a valid value, and if it is, returns the final
         value (after conversions if necessary)
         """
-        insensitive, true_value, false_value = self.get_bool_options(bool_options)
-        true_value = str(true_value)
-        false_value = str(false_value)
-        error_msg = "%s is not a valid value, enter %s or %s" % (
+
+        true_value, false_value = options["1"], options["2"]
+        error_msg = "[o]%s@ is not a valid value, enter %s or %s" % (
             value,
             true_value,
             false_value,
         )
-        if insensitive:
-            value = value.lower()
+        if condition == 'i':
             true_value = true_value.lower()
             false_value = false_value.lower()
+            value = value.lower()
+
         if value == true_value:
             return True, True
         elif value == false_value:
@@ -324,22 +272,21 @@ class Printy:
             self.format(error_msg)
             return False, False
 
-    def check_integer(self, value, int_options=None):
+    def check_integer(self, value: str, condition: str) -> tuple:
         """
         Validates the value when the type must be an integer, returns a boolean
         specifying whether it is a valid value, and if it is, returns the final
         value (after conversions if necessary)
         """
         # the only options allowed for integer types are '+' and '-'
-        opt = self.get_int_options(int_options)
         error_msg = (
-            "%s is not a valid number,please enter a [b]rounded@"
-            " number, please check you are not adding some "
-            "decimal digits" % value
+                "[o]%s@ is not a valid number,please enter a [b]rounded@"
+                " number, please check you are not adding some "
+                "decimal digits" % value
         )
-        if opt:
-            error_msg += ', make sure also it is a %s number' % (
-                'positive' if opt == '+' else 'negative'
+        if condition in ['+', '-']:
+            error_msg += ', make sure also it is a [y]%s@ number' % (
+                'positive' if condition == '+' else 'negative'
             )
         # Let's try to convert it to integer
         valid_value = False
@@ -348,19 +295,20 @@ class Printy:
         except (ValueError, TypeError):
             self.format(error_msg)
         else:
-            if opt:
-                if opt == '+' and value >= 0:
+            if condition:
+                if condition == '+' and value >= 0:
                     valid_value = True
-                elif opt == '-' and value < 0:
+                elif condition == '-' and value < 0:
                     valid_value = True
                 else:
+                    self.format(error_msg)
                     valid_value = False
             else:
                 valid_value = True
 
         return value, valid_value
 
-    def check_float(self, value, float_options=None):
+    def check_float(self, value: str, condition: str) -> tuple:
         """
         Validates the value when the type must be an float, similar to integer check,
         but now it can have decimal digits, returns a boolean specifying whether it
@@ -368,13 +316,10 @@ class Printy:
         value (after conversions if necessary)
         """
         # Same integer options are allowed
-        opt = self.get_int_options(float_options)
-        error_msg = (
-            "%s is not a valid number" % value
-        )
-        if opt:
-            error_msg += ', make sure also it is a %s number' % (
-                'positive' if opt == '+' else 'negative'
+        error_msg = "[o]%s@ is not a valid number" % value
+        if condition in ['+', '-']:
+            error_msg += ', make sure also it is a [y]%s@ number' % (
+                'positive' if condition == '+' else 'negative'
             )
         # Let's try to convert it to integer
         valid_value = False
@@ -383,10 +328,10 @@ class Printy:
         except (ValueError, TypeError):
             self.format(error_msg)
         else:
-            if opt:
-                if opt == '+' and value >= 0:
+            if condition:
+                if condition == '+' and value >= 0:
                     valid_value = True
-                elif opt == '-' and value < 0:
+                elif condition == '-' and value < 0:
                     valid_value = True
                 else:
                     valid_value = False
@@ -395,9 +340,91 @@ class Printy:
 
         return value, valid_value
 
+    def check_string(self, value: str, options: dict, condition: str):
+        """
+        if options were passed, then it validates that the value belongs to
+        those options
+        """
+        error_msg = "[o]%s@ is not a valid value" % value
+        if options:
+            if condition == 'i':
+                # then we need to create a dictionary where the keys are the
+                # lowercase of the options' values, and the values are the
+                # options' keys
+                new_options = {}
+                for key, val in options.items():
+                    new_options[val.lower()] = key
+                value = value.lower()
+
+                if value in new_options.keys():
+                    return options[new_options[value]], True
+                elif value in options.keys():
+                    return options[value], True
+                else:
+                    self.format(error_msg)
+                    return value, False
+            else:
+                if value in options.values():
+                    return value, True
+                elif value in options.keys():
+                    return options[value], True
+                else:
+                    self.format(error_msg)
+                    return value, False
+        else:
+            return value, True
+
+    @classmethod
+    def _render_options(cls, options: dict, input_type: str, default: str,
+                        render_options: bool) -> str:
+        """
+        Returns a string to present to the user specifying the available
+        options. 'options' must be normalized.
+        """
+        render = ""
+        if render_options:
+            if options and input_type in [cls.STR, cls.BOOL]:
+                if input_type == cls.BOOL:
+                    if len(options) >= 2:
+                        render += " (%s/%s)" % (options['1'], options['2'])
+                    if default:
+                        # We escape the '[' and ']' so they can be formatted
+                        render += " \[%s\]" % default
+                else:
+                    render += " default: %s\n" % default
+                    for item, value in options.items():
+                        render += "  %s) %s\n" % (item, value)
+
+        return render
+
+    @classmethod
+    def _normalize_options(cls, options: list, input_type: str):
+        """
+        Takes the list passed as options and returns a dictionary enumerating
+        all the options, i.e. if we pass ['option_1', 'options_2'], then we
+        return {'1': 'option_1', '2': 'option_2'}
+        """
+        normalized_options = {}
+        if options is not None:
+            if input_type == cls.BOOL:
+                if len(options) < 2:
+                    options = ['True', 'False']
+                else:
+                    options = options[:2]
+            else:
+                if len(options) < 2:
+                    raise ValueError("'options' must contain at least two items")
+        else:
+            options = ['True', 'False'] if input_type == cls.BOOL else []
+
+        for option in range(len(options)):
+            normalized_options[str(option + 1)] = str(options[option])
+
+        return normalized_options
+
     def format_input(self, *args, **kwargs):
         """
-        Colorize the text prompted by input().
+        Colorize the text prompted by input() and applies some validation.
 
         Also, it takes an additional parameter 'type', to tell the prompt not
         to accept a format other than the specified. As every input is converted
@@ -412,50 +439,56 @@ class Printy:
         if input_type not in self.types:
             raise InvalidInputType(input_type)
 
-        # bool_options will override the default True/False
-        # it has to be passed as a string with the following syntax:
-        # bool_options="i{True/False}", where 'i', if passed, will tell us
-        # that the values are case insensitive, otherwise, values will be forced
-        # to a exact match
-        options = kwargs.get('options', '')
+        # A list containing the value valid values
+        options = kwargs.get('options', None)
+        # render_options defines whether the options should be rendered or not
+        render_options = kwargs.get('render_options', True)
         # when no value is entered, the default will be added
-        default = kwargs.get('default', '')
-
-        # remove extra parameters so we don't pass it to
-        # the get_formatted_text function
-        if 'type' in kwargs:
-            kwargs.pop('type')
-        if 'options' in kwargs:
-            kwargs.pop('options')
+        default = str(kwargs.get('default', ''))
+        # Tells us the conditions according to the type, for numbers
+        # we can say '+' or '-' whether we want only positives values or negative
+        # values, for strings and boolean we can specify 'i' if we want to allow
+        # user to type cas insensitive values
+        condition = str(kwargs.get('condition', ''))
 
         # Include the value for the get_formatted_text function
+        text, flags = '', ''
         if len(args) == 0:
-            args = ['']
+            args = [text, flags]
+        elif len(args) == 1:
+            text = args[0]
+        else:
+            text, flags = args[0], args[1]
 
+        # Normalize the options
+        options = self._normalize_options(options, input_type)
         # Will tell us whether the user sent a value value according to the
         # specified type or not
         valid_value = False
         result = None
         while not valid_value:
+            render_options = self._render_options(options, input_type, default, render_options)
             # Prints out the message if any was passed
-            result = str(input(self.get_formatted_text(*args, **kwargs)))
+            result = str(
+                input(
+                    self.get_formatted_text(*args, **kwargs)
+                    + self.get_formatted_text(render_options, flags)
+                )
+            )
 
             if result == '':
                 result = default
 
             if input_type == self.BOOL:
-                # now let's try to convert the value to a Boolean
-                result, valid_value = self.check_boolean(result, options)
+                result, valid_value = self.check_boolean(result, options, condition)
 
             elif input_type == self.INT:
-                # Let's try to convert it to integer
-                result, valid_value = self.check_integer(result, options)
+                result, valid_value = self.check_integer(result, condition)
 
             elif input_type == self.FLOAT:
-                # Almost the same for integer, but this time it just have to
-                # be a number, rounded or not
-                result, valid_value = self.check_float(result, options)
+                result, valid_value = self.check_float(result, condition)
+
             else:
-                result, valid_value = str(result), True
+                result, valid_value = self.check_string(result, options, condition)
 
         return result

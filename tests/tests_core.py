@@ -1,9 +1,6 @@
 import unittest
 from unittest import mock
-from printy.exceptions import (
-    InvalidFlag, InvalidInputType, BoolOptionsNotValid,
-    IntOptionsNotValid, FloatOptionsNotValid
-)
+from printy.exceptions import InvalidFlag, InvalidInputType
 from printy.core import Printy, WINDOWS
 from printy.flags import Flags
 
@@ -58,6 +55,28 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
         with self.assertRaises(InvalidFlag) as e:
             self.printy.format(self.sample_text, flags)
         self.assertEqual(e.exception.flag, 'P')
+
+    def test_high_intensity_flag_color(self):
+        """
+        Checks the correct format is returned for a high
+        intensity (>) flag color
+        """
+        flag = 'p>'
+        text = 'Hello'
+        expected_text = '\x1b[38;5;98mHello\x1b[0m'
+
+        self.assertEqual(self.raw_text(text, flag), expected_text)
+
+    def test_low_intensity_flag_color(self):
+        """
+        Checks the correct format is returned for a low
+        intensity (<) flag color
+        """
+        flag = '<p'
+        text = 'Hello'
+        expected_text = '\x1b[38;5;54mHello\x1b[0m'
+
+        self.assertEqual(self.raw_text(text, flag), expected_text)
 
     def tests_always_closing_format(self):
         """
@@ -213,228 +232,236 @@ class TestInputy(unittest.TestCase):
     float_valid_test = 45.6
     bool_valid_test = False
 
-    def test_get_bool_options_case_insensitive(self):
+    def test_normalize_options_not_enough_options_raises_value_error(self):
         """
-        Tests returning True for the insensitive value if 'i' is passed as
-        the first character of the 'options' parameter
+        Tests that passing a list with less than 2 items as 'options' raises
+        a Value Error when input_type is different than 'bool'
         """
-        options = 'i{y/n}'
-        insensitive, true_option, false_option = self.inputy.get_bool_options(options)
+        with self.assertRaises(ValueError):
+            self.inputy._normalize_options([], self.inputy.STR)
 
-        self.assertTrue(insensitive)
-        self.assertEqual(true_option, 'y')
-        self.assertEqual(false_option, 'n')
-
-    def test_get_bool_options_case_sensitive(self):
+    def test_normalize_options_bool_more_than_two_items_get_the_first_two(self):
         """
-        Tests returning True for the insensitive value if no 'i' is passed as
-        the first character of the 'options' parameter
+        Tests that passing more than 2 items as options for input_type 'bool'
+        returns only the first two
         """
-        options = 'y/n'
-        insensitive, true_option, false_option = self.inputy.get_bool_options(options)
+        options = ['yes', 'no', 'Yep', 'Nope']
+        normalized_options = self.inputy._normalize_options(options, self.inputy.BOOL)
+        expected_options = {'1': 'yes', '2': 'no'}
 
-        self.assertFalse(insensitive)
-        self.assertEqual(true_option, 'y')
-        self.assertEqual(false_option, 'n')
+        self.assertEqual(normalized_options, expected_options)
 
-    def test_default_value_options(self):
+    def test_normalize_options_bool_less_than_two_items_returns_tru_false(self):
         """
-        Tests return the default 'True' and 'False' and case insensitive if no
-        options are passed
+        Tests that passing more than 2 items as options for input_type 'bool'
+        returns only the first two
         """
-        options = ''
-        insensitive, true_option, false_option = self.inputy.get_bool_options(options)
+        options = ['yes']
+        normalized_options = self.inputy._normalize_options(options, self.inputy.BOOL)
+        expected_options = {'1': 'True', '2': 'False'}
 
-        self.assertTrue(insensitive)
-        self.assertTrue(true_option)
-        self.assertFalse(false_option)
+        self.assertEqual(normalized_options, expected_options)
 
-    def test_passing_wrong_flag_for_case_insensitive(self):
+    def test_check_boolean_case_insensitive(self):
         """
-        Tests that passing a value different than 'i' for the insensitive
-        flag in in 'options' parameter when the type is bool, raises an exception
+        Test that passing a different case for one of the options still
+        returns the value
         """
-        options = 'f{y/n}'
-        with self.assertRaises(BoolOptionsNotValid) as e:
-            self.inputy.get_bool_options(options)
-        self.assertEqual(e.exception.options, options)
+        options = {'1': 'y', '2': 'n'}
+        value = 'Y'
+        result, valid = self.inputy.check_boolean(value, options, 'i')
 
-    def test_passing_invalid_options_to_bool_type(self):
+        self.assertEqual(result, True)
+        self.assertEqual(valid, True)
+
+    def test_check_boolean_case_sensitive(self):
         """
-        Tests that passing an invalid option value to the parameter 'options'
-        raises an BoolOptionsNotValid
+        Test that passing a different case for one of the options returns
+        an invalid value
         """
-        invalid_options = "jgnlf"
-        with self.assertRaises(BoolOptionsNotValid) as e:
-            self.inputy.get_bool_options(invalid_options)
-        self.assertEqual(e.exception.options, invalid_options)
+        options = {'1': 'y', '2': 'n'}
+        value = 'Y'
+        result, valid = self.inputy.check_boolean(value, options, '')
 
-    def test_get_int_options(self):
-        """ Test returning valid options"""
-        positive = '+'
-        negative = '-'
-        int_options_positive = self.inputy.get_int_options(positive)
-        int_options_negative = self.inputy.get_int_options(negative)
+        self.assertEqual(result, False)
+        self.assertEqual(valid, False)
 
-        self.assertEqual(positive, int_options_positive)
-        self.assertEqual(negative, int_options_negative)
-
-    def test_passing_long_character_as_int_options(self):
+    def test_check_integer_no_condition(self):
         """
-        Tests that passing more than one character (only + or - are allowed)
-        raises an exception
+        Tests that passing no condition to check an integer returns the value
         """
-        long_int_options_one = '+-'
-        long_int_options_two = 'plus'
+        positive_value = 5
+        negative_value = -5
+        condition = ''
+        result_positive, valid_positive = self.inputy.check_integer(str(positive_value), condition)
+        result_negative, valid_negative = self.inputy.check_integer(str(negative_value), condition)
 
-        with self.assertRaises(IntOptionsNotValid) as e_one:
-            self.inputy.get_int_options(long_int_options_one)
-        with self.assertRaises(IntOptionsNotValid) as e_two:
-            self.inputy.get_int_options(long_int_options_two)
-        self.assertEqual(e_one.exception.options, long_int_options_one)
-        self.assertEqual(e_two.exception.options, long_int_options_two)
+        self.assertTrue(valid_positive)
+        self.assertTrue(valid_negative)
+        self.assertEqual(result_positive, 5)
+        self.assertEqual(result_negative, -5)
 
-    def test_check_boolean_case_sensitive_returns_value_converted(self):
+    def test_check_integer_condition_only_positive(self):
         """
-        tests that passing a value (according to the options) to a type='bool'
-        returns a converted value (True or False)
+        Test that passing a condition '-' to the check_integer function will
+        return a valid value only when the value is negative
         """
-        options = 'y/n'
-        value_true = 'y'
-        value_false = 'n'
-        returned_value_true, valid_value_true = self.inputy.check_boolean(value_true, options)
-        returned_value_false, valid_value_false = self.inputy.check_boolean(value_false, options)
+        positive_value = 5
+        negative_value = -5
+        condition = '-'
+        result_positive, valid_positive = self.inputy.check_integer(str(positive_value), condition)
+        result_negative, valid_negative = self.inputy.check_integer(str(negative_value), condition)
 
-        self.assertEqual(returned_value_true, True)
-        self.assertEqual(returned_value_false, False)
-        self.assertTrue(valid_value_true)
-        self.assertTrue(valid_value_false)
+        self.assertFalse(valid_positive)
+        self.assertTrue(valid_negative)
 
-    def test_check_boolean_case_insensitive_returns_value_converted(self):
+        self.assertEqual(result_positive, 5)
+        self.assertEqual(result_negative, -5)
+
+    def test_check_integer_condition_only_negative(self):
         """
-        tests that passing a value with different case (according to the options
-        as case insensitive) to a type='bool' returns a converted value (True or False)
+        Test that passing a condition '-' to the check_integer function will
+        return a valid value only when the value is negative
         """
-        options = 'i{y/n}'
-        value_true = 'Y'
-        value_false = 'N'
-        returned_value_true, valid_value_true = self.inputy.check_boolean(value_true, options)
-        returned_value_false, valid_value_false = self.inputy.check_boolean(value_false, options)
+        positive_value = 5
+        negative_value = -5
+        condition = '+'
+        result_positive, valid_positive = self.inputy.check_integer(str(positive_value), condition)
+        result_negative, valid_negative = self.inputy.check_integer(str(negative_value), condition)
 
-        self.assertEqual(returned_value_true, True)
-        self.assertEqual(returned_value_false, False)
-        self.assertTrue(valid_value_true)
-        self.assertTrue(valid_value_false)
+        self.assertTrue(valid_positive)
+        self.assertFalse(valid_negative)
 
-    def test_check_boolean_invalid_value(self):
+        self.assertEqual(result_positive, 5)
+        self.assertEqual(result_negative, -5)
+
+    def test_check_float_no_condition(self):
         """
-        tests passing an invalid value to check_bool returns False as the value
-        and also False as 'valid_value'
+        Tests that passing no condition to check a float returns the value
         """
-        options = 'i{y/n}'
-        value_true = 'Yes'
-        value_false = 'No'
-        returned_value_true, valid_value_true = self.inputy.check_boolean(value_true, options)
-        returned_value_false, valid_value_false = self.inputy.check_boolean(value_false, options)
+        positive_value = 5.0
+        negative_value = -5.0
+        condition = ''
+        result_positive, valid_positive = self.inputy.check_float(str(positive_value), condition)
+        result_negative, valid_negative = self.inputy.check_float(str(negative_value), condition)
 
-        self.assertEqual(returned_value_true, False)
-        self.assertEqual(returned_value_false, False)
-        self.assertFalse(valid_value_true)
-        self.assertFalse(valid_value_false)
+        self.assertTrue(valid_positive)
+        self.assertTrue(valid_negative)
+        self.assertEqual(result_positive, 5.0)
+        self.assertEqual(result_negative, -5.0)
 
-    def test_check_integer_returns_converted_value(self):
-        """ tests that check_integer returns the value converted as integer"""
-        value = 34
-        returned_value, valid_value = self.inputy.check_integer(value)
-
-        self.assertTrue(isinstance(returned_value, int))
-        self.assertEqual(returned_value, value)
-        self.assertTrue(valid_value)
-
-    def test_check_integer_with_positive_option(self):
+    def test_check_float_condition_only_positive(self):
         """
-        Tests that passing '+' as options for type='int' returns the converted
-        value and valid_value as False if it is not a positive number
+        Test that passing a condition '-' to the check_float function will
+        return a valid value only when the value is negative
         """
-        opts_positive = '+'
-        valid_int = 34
-        invalid_int = -34
-        return_valid_int, valid_value_valid_int = self.inputy.check_integer(valid_int, opts_positive)
-        return_invalid_int, valid_value_invalid_int = self.inputy.check_integer(invalid_int, opts_positive)
+        positive_value = 5.0
+        negative_value = -5.0
+        condition = '-'
+        result_positive, valid_positive = self.inputy.check_float(str(positive_value), condition)
+        result_negative, valid_negative = self.inputy.check_float(str(negative_value), condition)
 
-        self.assertTrue(isinstance(return_valid_int, int))
-        self.assertEqual(return_valid_int, valid_int)
-        self.assertTrue(valid_value_valid_int)
+        self.assertFalse(valid_positive)
+        self.assertTrue(valid_negative)
 
-        self.assertTrue(isinstance(return_invalid_int, int))
-        self.assertEqual(return_invalid_int, invalid_int)
-        self.assertFalse(valid_value_invalid_int)
+        self.assertEqual(result_positive, 5.0)
+        self.assertEqual(result_negative, -5.0)
 
-    def test_check_integer_with_negative_option(self):
+    def test_check_float_condition_only_negative(self):
         """
-        Tests that passing '-' as options for type='int' returns the converted
-        value and valid_value as False if it is not a negative number
+        Test that passing a condition '-' to the check_float function will
+        return a valid value only when the value is negative
         """
-        opts_positive = '-'
-        valid_int = -34
-        invalid_int = 34
-        return_valid_int, valid_value_valid_int = self.inputy.check_integer(valid_int, opts_positive)
-        return_invalid_int, valid_value_invalid_int = self.inputy.check_integer(invalid_int, opts_positive)
+        positive_value = 5.0
+        negative_value = -5.0
+        condition = '+'
+        result_positive, valid_positive = self.inputy.check_float(str(positive_value), condition)
+        result_negative, valid_negative = self.inputy.check_float(str(negative_value), condition)
 
-        self.assertTrue(isinstance(return_valid_int, int))
-        self.assertEqual(return_valid_int, valid_int)
-        self.assertTrue(valid_value_valid_int)
+        self.assertTrue(valid_positive)
+        self.assertFalse(valid_negative)
 
-        self.assertTrue(isinstance(return_invalid_int, int))
-        self.assertEqual(return_invalid_int, invalid_int)
-        self.assertFalse(valid_value_invalid_int)
+        self.assertEqual(result_positive, 5.0)
+        self.assertEqual(result_negative, -5.0)
 
-    def test_check_float_returns_converted_value(self):
-        """ tests that check_float returns the value converted as float"""
-        value = 34.5
-        returned_value, valid_value = self.inputy.check_float(value)
-
-        self.assertTrue(isinstance(returned_value, float))
-        self.assertEqual(returned_value, value)
-        self.assertTrue(valid_value)
-
-    def test_check_float_with_positive_option(self):
+    def test_check_string_options_by_number_case_sensitive(self):
         """
-        Tests that passing '+' as options for type='float' returns the converted
-        value and valid_value as False if it is not a positive number
+        Tests that, passing a set of options, the correct value is returned if
+        user enters the number of the item in the list (case sensitive scenario)
         """
-        opts_positive = '+'
-        valid_int = 34.5
-        invalid_int = -34.5
-        return_valid_int, valid_value_valid_int = self.inputy.check_float(valid_int, opts_positive)
-        return_invalid_int, valid_value_invalid_int = self.inputy.check_float(invalid_int, opts_positive)
+        options = {'1': 'Oranges', '2': 'Apples', '3': 'Pineapples'}
+        selected = 3
+        expected_returned_value = options[str(selected)]
 
-        self.assertTrue(isinstance(return_valid_int, float))
-        self.assertEqual(return_valid_int, valid_int)
-        self.assertTrue(valid_value_valid_int)
+        result, valid = self.inputy.check_string(str(selected), options, '')
 
-        self.assertTrue(isinstance(return_invalid_int, float))
-        self.assertEqual(return_invalid_int, invalid_int)
-        self.assertFalse(valid_value_invalid_int)
+        self.assertTrue(valid)
+        self.assertEqual(result, expected_returned_value)
 
-    def test_check_float_with_negative_option(self):
+    def test_check_string_options_by_number_case_insensitive(self):
         """
-        Tests that passing '-' as options for type='float' returns the converted
-        value and valid_value as False if it is not a negative number
+        Tests that, passing a set of options, the correct value is returned if
+        user enters the number of the item in the list (case insensitive scenario)
         """
-        opts_positive = '-'
-        valid_int = -34.0
-        invalid_int = 34.0
-        return_valid_int, valid_value_valid_int = self.inputy.check_float(valid_int, opts_positive)
-        return_invalid_int, valid_value_invalid_int = self.inputy.check_float(invalid_int, opts_positive)
+        options = {'1': 'Oranges', '2': 'Apples', '3': 'Pineapples'}
+        selected = 3
+        expected_returned_value = options[str(selected)]
 
-        self.assertTrue(isinstance(return_valid_int, float))
-        self.assertEqual(return_valid_int, valid_int)
-        self.assertTrue(valid_value_valid_int)
+        result, valid = self.inputy.check_string(str(selected), options, 'i')
 
-        self.assertTrue(isinstance(return_invalid_int, float))
-        self.assertEqual(return_invalid_int, invalid_int)
-        self.assertFalse(valid_value_invalid_int)
+        self.assertTrue(valid)
+        self.assertEqual(result, expected_returned_value)
+
+    def test_check_string_options_invalid_by_number_case_insensitive(self):
+        """
+        Tests that, passing a set of options, the correct value is returned if
+        user enters the number of the item in the list (case insensitive scenario)
+        """
+        options = {'1': 'Oranges', '2': 'Apples', '3': 'Pineapples'}
+        selected = 6  # invalid
+        expected_returned_value = str(selected)
+
+        result, valid = self.inputy.check_string(str(selected), options, 'i')
+
+        self.assertFalse(valid)
+        self.assertEqual(result, expected_returned_value)
+
+    def test_check_string_options_case_insensitive(self):
+        """
+        Test that passing a different case for one of the options still
+        returns the value
+        """
+        options = {'1': 'Oranges', '2': 'Apples', '3': 'Pineapples'}
+        selected_capital_case = 'ORANGES'
+        selected_lower_case = 'oranges'
+        expected_returned_value = options['1']
+
+        result_capital, valid_capital = self.inputy.check_string(selected_capital_case, options, 'i')
+        result_lower, valid_lower = self.inputy.check_string(selected_lower_case, options, 'i')
+
+        self.assertTrue(valid_capital)
+        self.assertTrue(valid_lower)
+
+        self.assertEqual(result_capital, expected_returned_value)
+        self.assertEqual(result_lower, expected_returned_value)
+
+    def test_check_string_case_sensitive(self):
+        """
+        Test that passing a different case for one of the options returns
+        an invalid value
+        """
+        options = {'1': 'Oranges', '2': 'Apples', '3': 'Pineapples'}
+        selected_capital_case = 'ORANGES'
+        selected_matched_case = 'Oranges'
+        expected_returned_value = options['1']
+
+        result_capital, valid_capital = self.inputy.check_string(selected_capital_case, options, '')
+        result_matched, valid_matched = self.inputy.check_string(selected_matched_case, options, '')
+
+        self.assertFalse(valid_capital)
+        self.assertTrue(valid_matched)
+
+        self.assertEqual(result_matched, expected_returned_value)
 
     @mock.patch('builtins.input', return_value=str_valid_test)
     def test_passing_no_parameters_returns_a_value_str(self, mock_input):
@@ -443,8 +470,7 @@ class TestInputy(unittest.TestCase):
         self.assertEqual(result_str, self.str_valid_test)
 
     @mock.patch('builtins.input', return_value=int_valid_test)
-    def test_passing_no_parameters_returns_a_value_str_from_int(self,
-                                                                mock_input):
+    def test_passing_no_parameters_returns_a_value_str_from_int(self, mock_input):
         """ Testing 'inputy' as a normal 'input()' function """
         result_str_from_int = self.inputy.format_input()
         self.assertEqual(result_str_from_int, str(self.int_valid_test))
@@ -479,7 +505,7 @@ class TestInputy(unittest.TestCase):
 
         self.assertEqual(result_valid_boolean, self.bool_valid_test)
 
-    @mock.patch('builtins.input', side_effect=[str_valid_test, None, int_valid_test, 'true'])
+    @mock.patch('builtins.input', side_effect=[str_valid_test, None, int_valid_test, 'True'])
     def test_passed_invalid_when_requested_boolean_str(self, mock_input):
         """
         Test that, when specifying the user has to enter a boolean
