@@ -8,7 +8,7 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
 ![PyPI - License](https://img.shields.io/pypi/l/printy?style=flat-square)
 
-Printy is **lite** and **cross-platform** library that extends the functionalities of the 
+Printy is a **light** and **cross-platform** library that extends the functionalities of the 
 built-in functions ```print()``` and ```input()```. Printy stands out for its
 simplicity and for being and easy to use library, it lets you colorize and apply some standard formats 
 to your text with an intuitive and friendly API based on **flags**.
@@ -22,6 +22,22 @@ text and to validate some input. If you want to have more control over the
 console output check out **[Rich](https://github.com/willmcgugan/rich)** by @willmcgugan, 
 an amazing library that let's you do much more cool things!!</sub>_
 
+## Table of Contents
+1. [Installation](#installation)
+2. [How to use it?](#how-to-use-it)
+    1. [Using global flags](#using-global-flags)
+    2. [Using inline flags](#using-inline-flags)
+3. [What about input()?](#what-about-input)
+4. [API](#api)
+    1. [printy()](#printy)
+    2. [inputy()](#inputy)
+    3. [List 1: flags](#list-1-flags)
+    4. [List 2: types](#list-2-types)
+    5. [List 2: conditions](#list-3-conditions)
+5. [Changelog](#changelog)
+6. [Dependencies](#dependencies)
+7. [Contributing](#contributing)
+8. [Contributors](#contributors-)
 
 ## Installation
 
@@ -38,7 +54,7 @@ python -m printy
 ```
 This will print out some instructions right away.
 
-![Printy Helpme](.github/printy_helpme.png)
+![Printy Help me](.github/printy_helpme.png)
  
 #### Using global flags
 
@@ -52,13 +68,16 @@ Printy is still a 'print' statement, so you can use it as it is:
 printy("text with no format")
 ```
 
+![Printy no format](.github/printy_no_format.png)
+
 You can use a global set of flags to specify a format you want to apply to the text,
 let's say we want to colorize a text with a bold blue and also adding an underline:
 ```python
 printy("Text with a bold blue color and underlined", 'bBU')
 ```
+![Printy global bold blue](.github/printy_global_bold_blue.png)
 
-#### Using inline format
+#### Using inline flags
 Although applying a global format is interesting, it is not as much as applying
 some specific format to some section of the text only. For that, printy uses a 
 intuitive syntax to accomplish that goal. Use the [] to specify the flags to use
@@ -67,6 +86,7 @@ section:
 ```python
 printy("Predefined format [rI]This is red and with italic style@ also predefined format")
 ```
+![Printy inline red italic](.github/printy_inline_red_italic.png)
 
 The text that is not surrounded by the format syntax will remain with the predefined 
 format.
@@ -76,17 +96,20 @@ in the 'predefined' parameter
 ```python
 printy("Now this is blue [rI]Still red italic@ and also blue", predefined="b")
 ```
+![printy changing predefined](.github/printy_changing_predefined.png)
 
 Or, you can override the whole format without changing the inline format with a global flag:
 ```python
 printy("Now i am still blue, [rI]and also me@, and me as well ", "b")
 ```
+![Printy overriding inline with global](.github/printy_override_inline_with_global.png)
 
 You can combine it with f-strings:
 ```python
 a = 60
 printy(f"The day has [yB]{ 24 * a }@ minutes")
 ```
+![Printy f-strings](.github/printy_f_strings.png)
 
 Printy also supports reading from a file, just pass the path to your file
 in the file parameter:
@@ -96,6 +119,8 @@ in the file parameter:
 # in the 'flags' parameter
 printy(file="/path/to/your/file/file.extension", flags="cU")
 ```
+![Printy from file](.github/printy_from_file.png)
+
 
 ## What about input()?
 
@@ -131,30 +156,30 @@ type, therefore, from the above examples, both *fruit* will be str, *qty* will b
 
 ![Printy inputy Demo](.github/inputy_example.png)
 
-##API
+## API
 
-###printy()
+### printy()
 
 | Parameters | type |  | Description |
 | --- | --- | --- | --- |
 | value | str | required | Value to be formatted |
-| flags | str | optional | Global flags to be applied, they can be passed in the 'value' with the following syntax: [flags]value@ (check [List 1](#list-1:-'flags') for more info)|
+| flags | str | optional | Global flags to be applied, they can be passed in the 'value' with the following syntax: [flags]value@ (check [List 1](#list-1-flags) for more info)|
 | predefined | str | optional | A set of flags to apply to the value as its predefined value |
 | file | str | optional | A path to a file where we want to read the value from | 
 | end | str | optional | A value to be appended to the value, default is '\n' |
 
-###inputy()
+### inputy()
 <sub>plus printy() parameters</sub>
 
 | Parameters | type |  | Description |
 | --- | --- | --- | --- |
-| type | str | optional | Type of value we want the user to enter (check [List 2](#list-2:-'type') for more info)|
+| type | str | optional | Type of value we want the user to enter (check [List 2](#list-2-types) for more info)|
 | options | list | optional | Valid only for types 'str' and 'bool', a list of options to scope the value |
 | render_options | bool | optional | Specify whether we want to display the options to the user or not | 
 | default | str | optional | If no value is entered, this one will be taken, make sure that it belongs to the options list (if passed) | 
-| condition | str | optional | A character that applies certain restrictions to the value (check [List 3](#list-3:-'condition') for mor info |
+| condition | str | optional | A character that applies certain restrictions to the value (check [List 3](#list-3-conditions) for mor info |
 
-#### List 1: 'flags'
+### List 1 'flags'
 
 **COLORS**
 - k - Applies a black color to the text
@@ -192,13 +217,13 @@ type, therefore, from the above examples, both *fruit* will be str, *qty* will b
 - H - Highlights the text
 - S - crosses out the text, aka Strike
 
-#### List 2: 'type'
+### List 2 'types'
 - 'int': Value must be an integer or a string that can be turn into an integer, returns the value as an integer
 - 'float': Value must be a float or a string that can be turn into a float, returns the value as a float
 - 'bool': A string matching 'True' or 'False' if no options are passed, otherwise, a string that matches one of the options, returns the value as a boolean
 - 'str': The default type, if 'options' is passed, then the string must match one of the options or its item number.
 
-####List 3: 'condition'
+### List 3 'conditions'
 - '+': Valid for 'int' and 'float' types only. The value must be a **positive** number
 - '-': Valid for 'int' and 'float' types only. The value must be a **negative** number
 - 'i': valid for 'str' and 'bool' types only. The value is case insensitive, by default it is case sensitive

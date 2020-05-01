@@ -391,7 +391,7 @@ class Printy:
                         # We escape the '[' and ']' so they can be formatted
                         render += " \[%s\]" % default
                 else:
-                    render += " default: %s\n" % default
+                    render += " default: %s\n" % default if default else '\n'
                     for item, value in options.items():
                         render += "  %s) %s\n" % (item, value)
 

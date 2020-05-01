@@ -92,12 +92,12 @@ You can always override the whole format with a global flag:
 [n]    >>>@ printy([n>]'\[r\]Red\@ Default Color \[yH\]Yellow Highlighted\@ Default Color'@[<o],@ [n>]'b'@)
     [b]Red Default Color Yellow Highlighted Default Color@
 
-Or you can change only the default color:
+Or you can change only the predefined color:
 
-[n]    >>>@ printy([n>]'\[r\]Red\@ Default Color \[yH\]Yellow Highlighted\@ Default Color'@[<o],@ [r]default@=[n>]'b'@)
+[n]    >>>@ printy([n>]'\[r\]Red\@ Default Color \[yH\]Yellow Highlighted\@ Default Color'@[<o],@ [r]predefined@=[n>]'b'@)
     [r]Red@ [b]Default Color@ [yH]Yellow Highlighted@ [b]Default Color@
 
-[n]    >>>@ printy([n>]'\[r\]Red\@ Default Color \[yH\]Yellow Highlighted\@ Default Color'@[<o],@ [r]default@=[n>]'nBIU'@)
+[n]    >>>@ printy([n>]'\[r\]Red\@ Default Color \[yH\]Yellow Highlighted\@ Default Color'@[<o],@ [r]predefined@=[n>]'nBIU'@)
     [r]Red@ [nBIU]Default Color@ [yH]Yellow Highlighted@ [nBIU]Default Color@
 
 If you need to use one of the special characters ('\[', '\]', '\@'), simply escape them
