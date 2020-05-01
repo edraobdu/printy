@@ -23,6 +23,7 @@ console output check out **[Rich](https://github.com/willmcgugan/rich)** by @wil
 an amazing library that let's you do much more cool things!!</sub>_
 
 ## Table of Contents
+
 1. [Installation](#installation)
 2. [How to use it?](#how-to-use-it)
     1. [Using global flags](#using-global-flags)
@@ -46,6 +47,7 @@ you can either clone this repository or install it via pip
 ```python
 pip install printy
 ```
+
 ## How to use it?
 
 Once you install printy, you can find a short but concise documentation about the
@@ -53,6 +55,7 @@ available flags and the syntax by running the following command on your console:
 ```python
 python -m printy
 ```
+
 This will print out some instructions right away.
 
 ![Printy Help me](.github/printy_helpme.png)
