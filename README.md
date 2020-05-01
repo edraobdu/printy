@@ -13,9 +13,9 @@ built-in functions ```print()``` and ```input()```. Printy stands out for its
 simplicity and for being and easy to use library, it lets you colorize and apply some standard formats 
 to your text with an intuitive and friendly API based on **flags**.
 
-![Printy printy Demo](.github/printy_demo.gif)
+![Printy demo](.github/demo_printy.gif)
 
-![Printy inputy Demo](.github/inputy_demo.gif)
+![Inputy Demo](.github/demo_inputy.gif)
 
 _<sub>NOTE: Printy manages the most common and simple tasks when it comes to print 
 text and to validate some input. If you want to have more control over the 
@@ -28,16 +28,17 @@ an amazing library that let's you do much more cool things!!</sub>_
     1. [Using global flags](#using-global-flags)
     2. [Using inline flags](#using-inline-flags)
 3. [What about input()?](#what-about-input)
-4. [API](#api)
+4. [Curious?](#curious)
+5. [API](#api)
     1. [printy()](#printy)
     2. [inputy()](#inputy)
     3. [List 1: flags](#list-1-flags)
     4. [List 2: types](#list-2-types)
     5. [List 2: conditions](#list-3-conditions)
-5. [Changelog](#changelog)
-6. [Dependencies](#dependencies)
-7. [Contributing](#contributing)
-8. [Contributors](#contributors-)
+6. [Changelog](#changelog)
+7. [Dependencies](#dependencies)
+8. [Contributing](#contributing)
+9. [Contributors](#contributors-)
 
 ## Installation
 
@@ -155,6 +156,31 @@ type, therefore, from the above examples, both *fruit* will be str, *qty* will b
 *confirmation* will be a boolean, so, you're gonna get the information right as you need it.   
 
 ![Printy inputy Demo](.github/inputy_example.png)
+
+
+## Curious?
+
+If you want to know what's behind the scenes, you can get the text with all the ANSI escaped sequences,
+for that, use the ```raw_format()``` function.
+
+```python
+from printy import raw_format
+raw_text = raw_format("Some [rB]formatted@ [yIU]text@")
+print(repr(raw_text))  
+print(raw_text)
+```
+
+![Printy raw format](.github/printy_raw_format.png)
+
+For convenience, we have stored all colors and formats flags in list, in case you need them:
+
+```python
+from printy import COLORS, FORMATS
+print(COLORS)
+print(FORMATS)
+```
+
+![Printy COLORS FORMATS](.github/printy_COLORS_FORMATS.png)
 
 ## API
 
