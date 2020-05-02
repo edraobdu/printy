@@ -188,13 +188,80 @@ class Printy:
         tuple_text = cls._get_inline_format_as_tuple(text)
         return cls._replace_escaped(''.join(x[0] for x in tuple_text))
 
-    def get_formatted_text(self, value: str, flags='', predefined='',
-                           **kwargs) -> str:
+    @classmethod
+    def _escape_special_chars(cls, value):
+        """ Escape all the special characters in the value """
+        _repr = repr(value)
+        for char in cls.special_chars:
+            _repr = _repr.replace(char, '\\' + char)
+        return _repr
+
+    @classmethod
+    def _pretty_print_object(cls, obj, level=1):
+        """
+        Recursive function to pretty print objects, with some
+        indentations if needed.
+        """
+
+        def _nested(nested_obj, nested_level=level):
+            """
+            Define an indented dictionary
+            """
+            indentation_values = "\t" * nested_level
+            indentation_braces = "\t" * (nested_level - 1)
+            if isinstance(nested_obj, dict):
+                return "{\n%(body)s%(indent_braces)s}" % {
+                    "body": "".join("%(indent_values)s\'%(key)s\': %(value)s,\n" % {
+                        "key": str(key),
+                        "value": _nested(value, nested_level + 1),
+                        "indent_values": indentation_values
+                    } for key, value in nested_obj.items()),
+                    "indent_braces": indentation_braces
+                }
+            elif isinstance(nested_obj, list):
+                return "[\n%(body)s\n%(indent_braces)s]" % {
+                    "body": "".join("%(indent_values)s%(value)s,\n" % {
+                        "value": _nested(value, nested_level + 1),
+                        "indent_values": indentation_values
+                    } for value in nested_obj),
+                    "indent_braces": indentation_braces
+                }
+            elif isinstance(nested_obj, tuple):
+                return "(%(body)s)" % {
+                    "body": ", ".join("%(value)s" % {
+                        "value": _nested(value, nested_level + 1),
+                    } for value in nested_obj)
+                }
+            else:
+                return "[c]" + cls._escape_special_chars(nested_obj) + "@"
+
+        return _nested(obj)
+
+    @classmethod
+    def _repr_value(cls, value, pretty: bool) -> str:
+        """
+        In case a dictionary or a list or a set is passed as a value, we need
+        to get the representation of it, and, escape all the '[', ']' and '@'
+        characters that we find
+        """
+        if isinstance(value, (dict, list, tuple, set)):
+            if pretty:
+                return cls._pretty_print_object(value)
+            else:
+                return cls._escape_special_chars(value)
+        else:
+            return repr(value)
+
+    def get_formatted_text(self, value: str, flags: str = '', predefined: str = '',
+                           pretty: bool = False, **kwargs) -> str:
         """
         Applies the format specified by the 'flags' to the 'value'.
 
         If 'flag's is passed, 'predefined' will be omitted.
         """
+        # In case a dictionary or a list is passed
+        value = self._repr_value(value, pretty)
+
         if self.platform == WINDOWS and not self.virtual_terminal_processing:
             text = self._get_cleaned_text(value)
         else:
@@ -232,10 +299,10 @@ class Printy:
         return text
 
     def format(self, value='', flags='', predefined='', file='',
-               end=default_end):
+               end=default_end, pretty=False):
         """ Prints out the value """
         value = self.read_file(file) if file else value
-        print(self.get_formatted_text(value, flags, predefined), end=end)
+        print(self.get_formatted_text(value, flags, predefined, pretty), end=end)
 
     ##### ============= INPUTY ======================
 
