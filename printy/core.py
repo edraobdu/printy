@@ -256,11 +256,13 @@ class Printy:
                 return cls._pretty_print_object(value, indentation)
             else:
                 return cls._escape_special_chars(value)
+        elif isinstance(value, str):
+            return value
         else:
             return repr(value)
 
     def get_formatted_text(self, value: str, flags: str = '', predefined: str = '',
-                           pretty: bool = False, indentation: int = 4, **kwargs) -> str:
+                           pretty: bool = True, indentation: int = 4, **kwargs) -> str:
         """
         Applies the format specified by the 'flags' to the 'value'.
 
@@ -306,10 +308,12 @@ class Printy:
         return text
 
     def format(self, value='', flags='', predefined='', file='',
-               end=default_end, pretty=False, indentation=4):
+               end=default_end, pretty=True, indentation=4):
         """ Prints out the value """
         value = self.read_file(file) if file else value
-        print(self.get_formatted_text(value, flags, predefined, pretty, indentation), end=end)
+        print(self.get_formatted_text(
+            value, flags, predefined, pretty, indentation), end=end
+        )
 
     ##### ============= INPUTY ======================
 
@@ -346,7 +350,7 @@ class Printy:
             self.format(error_msg)
             return False, False
 
-    def check_integer(self, value: str, condition: str) -> tuple:
+    def check_integer(self, value: str, condition: str, max_digits: int) -> tuple:
         """
         Validates the value when the type must be an integer, returns a boolean
         specifying whether it is a valid value, and if it is, returns the final
@@ -354,20 +358,17 @@ class Printy:
         """
         # the only options allowed for integer types are '+' and '-'
         error_msg = (
-                "[o]%s@ is not a valid number,please enter a [b]rounded@"
-                " number, please check you are not adding some "
-                "decimal digits" % value
+            "\t[r>]Invalid Value:@ [o]%s@ is not a valid number" % value
         )
-        if condition in ['+', '-']:
-            error_msg += ', make sure also it is a [y]%s@ number' % (
-                'positive' if condition == '+' else 'negative'
-            )
         # Let's try to convert it to integer
         valid_value = False
         try:
             value = int(value)
         except (ValueError, TypeError):
-            self.format(error_msg)
+            error_msg += (
+                ".\n\tPlease enter a [b>]rounded@ number, please check you are "
+                "\n\tnot adding some [p>]decimal digits@"
+            )
         else:
             if condition:
                 if condition == '+' and value >= 0:
@@ -375,10 +376,24 @@ class Printy:
                 elif condition == '-' and value < 0:
                     valid_value = True
                 else:
-                    self.format(error_msg)
+                    error_msg += ', \n\tMake sure it is a [y]%s@ number\n' % (
+                        'positive' if condition == '+' else 'negative'
+                    )
                     valid_value = False
             else:
                 valid_value = True
+
+            # Check max digits
+            if max_digits is not None:
+                # Let's remove the negative sign if any
+                str_value = str(value).replace('-', '')
+                if len(str_value) > max_digits:
+                    error_msg += '. \n\tThe number must have only [o]%d@ digits' % max_digits
+                    valid_value = False
+
+        # Throw error
+        if not valid_value:
+            self.format(error_msg)
 
         return value, valid_value
 
@@ -496,6 +511,20 @@ class Printy:
 
         return normalized_options
 
+    @staticmethod
+    def _to_int(value):
+        """
+        Helper function to convert a value into an integer, useful
+        to validate some parameters
+        """
+        if value is not None:
+            try:
+                value = int(value)
+            except (ValueError, TypeError):
+                raise
+
+        return value
+
     def format_input(self, *args, **kwargs):
         """
         Colorize the text prompted by input() and applies some validation.
@@ -524,6 +553,11 @@ class Printy:
         # values, for strings and boolean we can specify 'i' if we want to allow
         # user to type cas insensitive values
         condition = str(kwargs.get('condition', ''))
+        # Defines the max number of digits that a number (int or float) can have
+        max_digits = self._to_int(kwargs.get('max_digits', None))
+        # Defines the max number of decipal numbers that the value can have,
+        # only valid for 'float' type
+        max_decimals = self._to_int(kwargs.get('max_decimals', None))
 
         # Include the value for the get_formatted_text function
         text, flags = '', ''
@@ -557,10 +591,10 @@ class Printy:
                 result, valid_value = self.check_boolean(result, options, condition)
 
             elif input_type == self.INT:
-                result, valid_value = self.check_integer(result, condition)
+                result, valid_value = self.check_integer(result, condition, max_digits)
 
             elif input_type == self.FLOAT:
-                result, valid_value = self.check_float(result, condition)
+                result, valid_value = self.check_float(result, condition, max_digits, max_decimals)
 
             else:
                 result, valid_value = self.check_string(result, options, condition)
