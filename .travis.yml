@@ -10,7 +10,7 @@ deploy:
   distributions: "sdist bdist_wheel"
   skip_existing: true
 install:
-  - pip install -r requirements.txt
+  - pip install coverage==5.0.4
 script:
   - coverage run -m unittest discover
 after_success:
