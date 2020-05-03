@@ -27,5 +27,5 @@ inputy = printy_instance.format_input
 
 # shortcut to get a list of the available flags and formats
 available_flags = Flags.get_flags().keys()
-COLORS = list(filter(lambda c: c.islower(),  available_flags))
-FORMATS = list(filter(lambda f: f.isupper(),  available_flags))
+COLORS = list(filter(lambda c: c.islower(), available_flags))
+FORMATS = list(filter(lambda f: f.isupper(), available_flags))

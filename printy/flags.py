@@ -57,6 +57,7 @@ class Flags:
 
     #### FORMATS
     BOLD = 'B', '1'
+    DIM = 'D', '2'
     ITALIC = 'I', '3'
     UNDERLINE = 'U', '4'
     HIGHLIGHT = 'H', '7'
