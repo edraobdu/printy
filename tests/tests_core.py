@@ -214,6 +214,109 @@ class TestInlineFlagsPrinty(unittest.TestCase):
         m.assert_called_once_with(file_name)
         self.assertEqual(result, text_in_file)
 
+    def test_escape_special_chars_method(self):
+        """
+        Test escaping especial characters correctly, this method is used when
+        an object other than a string is passed
+        """
+        text_to_escape = '[some text @ ]'
+        expected_value = '\[some text \@ \]'
+        escaped_text = Printy._escape_special_chars(text_to_escape)
+
+        self.assertEqual(expected_value, escaped_text)
+
+    def test_pretty_print_dicts(self):
+        """ Test pretty printing dictionaries """
+        dict_to_print = {'name': 'John Doe', 'age': 34}
+        expected_result = '{\n    [n>]\'name\'@: [c>]\'John Doe\'@[<oB],@\n    [n>]\'age\'@: [c]34@[<oB],@\n}'
+        pretty_dict = Printy._repr_value(dict_to_print)
+
+        self.assertEqual(expected_result, pretty_dict)
+
+    def test_pretty_print_lists(self):
+        """ Test pretty printing lists """
+        list_to_print = [1, 2, 'hello']
+        expected_result = '\[\n    [c]1@[<oB],@ [c]2@[<oB],@ [c>]\'hello\'@\n\]'
+        pretty_list = Printy._repr_value(list_to_print)
+
+        self.assertEqual(expected_result, pretty_list)
+
+    def test_pretty_printy_tuples(self):
+        """ Test pretty printing tuples """
+        tuple_to_print = (1, 2, 'hello')
+        expected_result = '(\n    [c]1@[<oB],@ [c]2@[<oB],@ [c>]\'hello\'@\n)'
+        pretty_tuple = Printy._repr_value(tuple_to_print)
+
+        self.assertEqual(expected_result, pretty_tuple)
+
+    def test_pretty_printy_sets(self):
+        """ Test pretty printing sets """
+        set_to_print = {1, 2, 'hello'}
+        expected_result = '{\n    [c]1@[<oB],@ [c]2@[<oB],@ [c>]\'hello\'@\n}'
+        pretty_set = Printy._repr_value(set_to_print)
+
+        self.assertEqual(expected_result, pretty_set)
+
+    def test_pretty_printy_dict_pretty_false(self):
+        """ Tests pretty printing a dict when 'pretty' parameter is set to False """
+        dict_to_print = {'name': 'John Doe', 'age': 34}
+        expected_result = '{\'name\': \'John Doe\', \'age\': 34}'
+        not_pretty_dict = Printy._repr_value(dict_to_print, pretty=False)
+
+        self.assertEqual(expected_result, not_pretty_dict)
+
+    def test_pretty_printy_list_pretty_false(self):
+        """ Tests pretty printing a list when 'pretty' parameter is set to False """
+        list_to_print = [1, 2, 'hello']
+        expected_result = '\[1, 2, \'hello\'\]'
+        not_pretty_list = Printy._repr_value(list_to_print, pretty=False)
+
+        self.assertEqual(expected_result, not_pretty_list)
+
+    def test_pretty_printy_tuple_pretty_false(self):
+        """ Tests pretty printing a tuple when 'pretty' parameter is set to False """
+        tuple_to_print = (1, 2, 'hello')
+        expected_result = '(1, 2, \'hello\')'
+        not_pretty_tuple = Printy._repr_value(tuple_to_print, pretty=False)
+
+        self.assertEqual(expected_result, not_pretty_tuple)
+
+    def test_pretty_printy_set_pretty_false(self):
+        """ Tests pretty printing a set when 'pretty' parameter is set to False """
+        set_to_print = {1, 2, 'hello'}
+        expected_result = '{1, 2, \'hello\'}'
+        not_pretty_set = Printy._repr_value(set_to_print, pretty=False)
+
+        self.assertEqual(expected_result, not_pretty_set)
+
+    def test_pretty_print_str_method_of_objects(self):
+        """ Test printing the str method of an object, both not defined and defined """
+        builtin_obj = int
+        expected_builtin_result = '<class \'int\'>'
+        pretty_builtin = Printy._repr_value(builtin_obj)
+
+        class Person:
+            def __str__(self):
+                return '[c]I am a person@'
+        custom_str = Person()
+        # Notice how it should not return the escaped character
+        expected_custom_result = '[c]I am a person@'
+        pretty_custom = Printy._repr_value(custom_str)
+
+        self.assertEqual(expected_builtin_result, pretty_builtin)
+        self.assertEqual(expected_custom_result, pretty_custom)
+
+    def test_pretty_object_in_dictionary(self):
+        """
+        Test pretty printing an str method of an object inside a dictionary
+        or any iterable, it should give it a light magenta color
+        """
+        dict_to_print = {'class': int}
+        expected_result = '{\n    [n>]\'class\'@: [m>]<class \'int\'>@[<oB],@\n}'
+        pretty_dict = Printy._repr_value(dict_to_print)
+
+        self.assertEqual(expected_result, pretty_dict)
+
 
 class TestInputy(unittest.TestCase):
     """
@@ -526,3 +629,47 @@ class TestInputy(unittest.TestCase):
         with self.assertRaises(InvalidInputType) as e:
             self.inputy.format_input(type=invalid_input_type)
         self.assertEqual(e.exception.input_type, invalid_input_type)
+
+    def test_converting_value_to_integer(self):
+        number_as_string_value = '2'
+        invalid_string = 'Not a number as a string'
+        none_value = None
+
+        self.assertEqual(Printy._to_int(number_as_string_value), 2)
+        self.assertEqual(Printy._to_int(none_value), None)
+        with self.assertRaises(ValueError):
+            Printy._to_int(invalid_string)
+
+    def test_max_digits(self):
+        """ Tests restriction when passing a max_digits parameter """
+
+        max_digits = 3
+        invalid_number = '1234'
+        valid_number = '123'
+
+        invalid_number_value, invalid_number_valid_value = self.inputy._check_number(
+            int, value=invalid_number, max_digits=max_digits
+        )
+        valid_number_value, valid_number_valid_value = self.inputy._check_number(
+            int, valid_number, max_digits=max_digits
+        )
+
+        self.assertTrue(valid_number_valid_value)
+        self.assertFalse(invalid_number_valid_value)
+
+    def test_max_decimals(self):
+        """ Tests restriction when passing a max_decimals parameter """
+
+        max_decimals = 3
+        invalid_number = '1234.1234'
+        valid_number = '1234.123'
+
+        invalid_number_value, invalid_number_valid_value = self.inputy._check_number(
+            float, value=invalid_number, max_decimals=max_decimals
+        )
+        valid_number_value, valid_number_valid_value = self.inputy._check_number(
+            float, valid_number, max_decimals=max_decimals
+        )
+
+        self.assertTrue(valid_number_valid_value)
+        self.assertFalse(invalid_number_valid_value)

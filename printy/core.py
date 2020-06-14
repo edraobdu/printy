@@ -76,9 +76,7 @@ class Printy:
         return False
 
     @classmethod
-    def _check_special_char_position(cls, last_special: str,
-                                     special: str) -> str:
-
+    def _check_special_char_position(cls, last_special: str, special: str) -> str:
         """
         Returns an action to execute if the character is well placed. It should
         only be applied over special characters.
@@ -189,12 +187,15 @@ class Printy:
         return cls._replace_escaped(''.join(x[0] for x in tuple_text))
 
     @classmethod
-    def _escape_special_chars(cls, value) -> str:
-        """ Escape all the special characters in the value """
-        _repr = repr(value)
+    def _escape_special_chars(cls, value):
+        """
+        Escape all the special characters in the value (or the string
+        representation of the value if an object is passed)
+        """
+        _str = str(value)
         for char in cls.special_chars:
-            _repr = _repr.replace(char, '\\' + char)
-        return _repr
+            _str = _str.replace(char, '\\' + char)
+        return _str
 
     @classmethod
     def _pretty_print_object(cls, obj, indentation: int, level: int = 1) -> str:
@@ -208,7 +209,7 @@ class Printy:
             indentation_braces = " " * indentation * (nested_level - 1)
             if isinstance(nested_obj, dict):
                 return "{\n%(body)s%(indent_braces)s}" % {
-                    "body": "".join("%(indent_values)s[n>]\"%(key)s\"@: %(value)s[<oB],@\n" % {
+                    "body": "".join("%(indent_values)s[n>]\'%(key)s\'@: %(value)s[<oB],@\n" % {
                         "key": str(key),
                         "value": _nested(value, nested_level + 1),
                         "indent_values": indentation_values
@@ -217,7 +218,7 @@ class Printy:
                 }
             elif isinstance(nested_obj, list):
                 return "\[\n%(indent_values)s%(body)s\n%(indent_braces)s\]" % {
-                    "body": "[<o],@ ".join("%(value)s" % {
+                    "body": "[<oB],@ ".join("%(value)s" % {
                         "value": _nested(value, nested_level + 1),
                     } for value in nested_obj),
                     "indent_braces": indentation_braces,
@@ -233,19 +234,23 @@ class Printy:
                 }
             elif isinstance(nested_obj, set):
                 return "{\n%(indent_values)s%(body)s\n%(indent_braces)s}" % {
-                    "body": "[<o],@ ".join("%(value)s" % {
+                    "body": "[<oB],@ ".join("%(value)s" % {
                         "value": _nested(value, nested_level + 1),
                     } for value in nested_obj),
                     "indent_braces": indentation_braces,
                     "indent_values": indentation_values
                 }
             else:
-                return "[c]" + cls._escape_special_chars(nested_obj) + "@"
-
+                if isinstance(nested_obj, str):
+                    return "[c>]\'" + cls._escape_special_chars(nested_obj) + "\'@"
+                elif isinstance(nested_obj, (int, float)):
+                    return "[c]" + cls._escape_special_chars(nested_obj) + "@"
+                else:
+                    return "[m>]" + cls._escape_special_chars(nested_obj) + "@"
         return _nested(obj)
 
     @classmethod
-    def _repr_value(cls, value, pretty: bool, indentation: int) -> str:
+    def _repr_value(cls, value, pretty: bool = True, indentation: int = 4) -> str:
         """
         In case a dictionary or a list or a set is passed as a value, we need
         to get the representation of it, and, escape all the '[', ']' and '@'
@@ -256,10 +261,8 @@ class Printy:
                 return cls._pretty_print_object(value, indentation)
             else:
                 return cls._escape_special_chars(value)
-        elif isinstance(value, str):
-            return value
         else:
-            return repr(value)
+            return str(value)
 
     def get_formatted_text(self, value: str, flags: str = '', predefined: str = '',
                            pretty: bool = True, indentation: int = 4, **kwargs) -> str:
@@ -268,7 +271,7 @@ class Printy:
 
         If 'flag's is passed, 'predefined' will be omitted.
         """
-        # In case a dictionary or a list is passed
+        # In case an object is passed instead of a string
         value = self._repr_value(value, pretty, indentation)
 
         if self.platform == WINDOWS and not self.virtual_terminal_processing:
@@ -350,25 +353,24 @@ class Printy:
             self.format(error_msg)
             return False, False
 
-    def check_integer(self, value: str, condition: str, max_digits: int) -> tuple:
-        """
-        Validates the value when the type must be an integer, returns a boolean
-        specifying whether it is a valid value, and if it is, returns the final
-        value (after conversions if necessary)
-        """
-        # the only options allowed for integer types are '+' and '-'
+    def _check_number(self, number_class, value: str = '', condition: str = '',
+                      max_digits: int = None, max_decimals: int = None) -> tuple:
+        """ Validates the value when it is a number """
+
+        # the only options allowed are '+' and '-'
         error_msg = (
-            "\t[r>]Invalid Value:@ [o]%s@ is not a valid number" % value
+                "\t[r>]Invalid Value:@ [o]%s@ is not a valid number" % value
         )
-        # Let's try to convert it to integer
+        # Let's try to convert it to the number type
         valid_value = False
         try:
-            value = int(value)
+            value = number_class(value)
         except (ValueError, TypeError):
-            error_msg += (
-                ".\n\tPlease enter a [b>]rounded@ number, please check you are "
-                "\n\tnot adding some [p>]decimal digits@"
-            )
+            if number_class == int:
+                error_msg += (
+                    ".\n\tPlease enter a [b>]rounded@ number, please check you are "
+                    "\n\tnot adding some [p>]decimal digits@"
+                )
         else:
             if condition:
                 if condition == '+' and value >= 0:
@@ -383,53 +385,56 @@ class Printy:
             else:
                 valid_value = True
 
+            # Let's remove the negative sign if any
+            str_value = str(value).replace('-', '')
+            split_number = str_value.split('.')
             # Check max digits
             if max_digits is not None:
-                # Let's remove the negative sign if any
-                str_value = str(value).replace('-', '')
-                if len(str_value) > max_digits:
-                    error_msg += '. \n\tThe number must have only [o]%d@ digits' % max_digits
+                if len(split_number[0]) > max_digits:
+                    error_msg += '. \n\tThe number must have [o]%d@ digits max' % max_digits
                     valid_value = False
-
+            if max_decimals is not None and len(split_number) > 1:
+                if len(split_number[1]) > max_decimals:
+                    error_msg += '. \n\tThe number must have [o]%d@ decimals max' % max_decimals
+                    valid_value = False
         # Throw error
         if not valid_value:
             self.format(error_msg)
 
         return value, valid_value
 
-    def check_float(self, value: str, condition: str) -> tuple:
+    def check_integer(self, value: str, condition: str = '', max_digits: int = None) -> tuple:
+        """
+        Validates the value when the type must be an integer, returns a boolean
+        specifying whether it is a valid value, and if it is, returns the final
+        value (after conversions if necessary)
+        """
+
+        return self._check_number(
+            int,
+            value=value,
+            condition=condition,
+            max_digits=max_digits
+        )
+
+    def check_float(self, value: str, condition: str = '',
+                    max_digits: int = None, max_decimals: int = None) -> tuple:
         """
         Validates the value when the type must be an float, similar to integer check,
         but now it can have decimal digits, returns a boolean specifying whether it
         is a valid value, and if it is, returns the final
         value (after conversions if necessary)
         """
-        # Same integer options are allowed
-        error_msg = "[o]%s@ is not a valid number" % value
-        if condition in ['+', '-']:
-            error_msg += ', make sure also it is a [y]%s@ number' % (
-                'positive' if condition == '+' else 'negative'
-            )
-        # Let's try to convert it to integer
-        valid_value = False
-        try:
-            value = float(value)
-        except (ValueError, TypeError):
-            self.format(error_msg)
-        else:
-            if condition:
-                if condition == '+' and value >= 0:
-                    valid_value = True
-                elif condition == '-' and value < 0:
-                    valid_value = True
-                else:
-                    valid_value = False
-            else:
-                valid_value = True
 
-        return value, valid_value
+        return self._check_number(
+            float,
+            value=value,
+            condition=condition,
+            max_digits=max_digits,
+            max_decimals=max_decimals
+        )
 
-    def check_string(self, value: str, options: dict, condition: str):
+    def check_string(self, value: str, options: dict = None, condition: str = ''):
         """
         if options were passed, then it validates that the value belongs to
         those options
