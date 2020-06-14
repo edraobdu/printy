@@ -65,6 +65,7 @@ either apply a global format or inline formats to specific parts of your text!
 [I]'I' -> Applies an italic font type to the text@
 [H]'H' -> Highlights the text@
 [S]'S' -> crosses out the text, aka Strike@
+[D]'S' -> Dim effect@
 
 
 [B]HOW TO USE IT?@

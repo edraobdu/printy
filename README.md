@@ -125,6 +125,21 @@ printy(file="/path/to/your/file/file.extension", flags="cU")
 ```
 ![Printy from file](.github/printy_from_file.png)
 
+You can also pretty print your dictionaries, lists, tuples, sets, and objects:
+
+```python
+my_dict = {'id': 71, 'zip_codes': ['050001', '050005', '050011', '050015', '050024'], 'code': '05001', 'country': {'code': 'co'}, 'city_translations': [{'language_code': 'es', 'name': 'Medellín'}], 'flag': None}
+printy(my_dict)
+```
+
+![Printy pretty dict](.github/printy_pretty_dict_four_indentation.png)
+
+```python
+my_dict = {'id': 71, 'zip_codes': ['050001', '050005', '050011', '050015', '050024'], 'code': '05001', 'country': {'code': 'co'}, 'city_translations': [{'language_code': 'es', 'name': 'Medellín'}], 'flag': None}
+printy(my_dict, indentation=2)
+```
+
+![Printy pretty dict](.github/printy_pretty_dict_two_indentation.png)
 
 ## What about input()?
 
@@ -156,9 +171,14 @@ a positive integer (valid also for 'float'), check the complete options below
 
 **The best part** is that the returned value's type is also the one of the specified 
 type, therefore, from the above examples, both *fruit* will be str, *qty* will be integer, and
-*confirmation* will be a boolean, so, you're gonna get the information right as you need it.   
+*confirmation* will be a boolean, so, you're gonna get the information right as you need it.
 
 ![Printy inputy Demo](.github/inputy_example.png)
+
+### New in v2.1.0
+You can also add some restriction for numbers: max_digits and max_decimals 
+
+![Printy inputy max digits and max decimals](.github/inputy_max_digits_max_decimals.png)
 
 
 ## Curious?
@@ -196,6 +216,8 @@ print(FORMATS)
 | predefined | str | optional | A set of flags to apply to the value as its predefined value |
 | file | str | optional | A path to a file where we want to read the value from | 
 | end | str | optional | A value to be appended to the value, default is '\n' |
+| pretty | bool | optional | True if we want to pretty print objects, False if we do not (default True) |
+| indentation | int | optional | Indentation when pretty printing dictionaries or any iterable (default 4) |
 
 ### inputy()
 <sub>plus printy() parameters</sub>
@@ -207,6 +229,8 @@ print(FORMATS)
 | render_options | bool | optional | Specify whether we want to display the options to the user or not | 
 | default | str | optional | If no value is entered, this one will be taken, make sure that it belongs to the options list (if passed) | 
 | condition | str | optional | A character that applies certain restrictions to the value (check [List 3](#list-3-conditions) for mor info |
+| max_digits | int | optional | Adds a restriction for numbers about the maximum number of digits that it should have |
+| max_decimals | int | optional | Adds a restriction for numbers about the maximum number of decimals that it should have |
 
 ### List 1 'flags'
 
@@ -244,7 +268,8 @@ print(FORMATS)
 - U - Applies an underline to the text
 - I - Applies an italic font type to the text
 - H - Highlights the text
-- S - crosses out the text, aka Strike
+- S - Crosses out the text, aka Strike
+- D - Dim effect
 
 ### List 2 'types'
 - 'int': Value must be an integer or a string that can be turn into an integer, returns the value as an integer
