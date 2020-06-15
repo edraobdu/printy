@@ -312,10 +312,49 @@ class TestInlineFlagsPrinty(unittest.TestCase):
         or any iterable, it should give it a light magenta color
         """
         dict_to_print = {'class': int}
-        expected_result = '{\n    [n>]\'class\'@: [m>]<class \'int\'>@[<oB],@\n}'
+        expected_result = '{\n    [n>]\'class\'@: <class \'int\'>[<oB],@\n}'
         pretty_dict = Printy._repr_value(dict_to_print)
 
         self.assertEqual(expected_result, pretty_dict)
+
+    def test_pretty_custom_str_method_in_dictionary(self):
+        class CustomStrMethod:
+            def __str__(self):
+                return '[rBU]Red Bold Underlined@ and [y]Yellow@'
+
+        dict_to_print = {'str': CustomStrMethod()}
+        expected_result = '{\n    [n>]\'str\'@: [rBU]Red Bold Underlined@ and [y]Yellow@[<oB],@\n}'
+        pretty_dict = Printy._repr_value(dict_to_print)
+
+        self.assertEqual(expected_result, pretty_dict)
+
+    def test_print_number(self):
+        integer_to_print = 123
+        float_to_print = 123.45
+        expected_result_integer = '[c]123@'
+        expected_result_float = '[c]123.45@'
+
+        result_integer = Printy._repr_value(integer_to_print)
+        result_float = Printy._repr_value(float_to_print)
+
+        self.assertEqual(expected_result_integer, result_integer)
+        self.assertEqual(expected_result_float, result_float)
+
+    def test_print_boolean(self):
+        expected_false = '[<o]False@'
+        expected_true = '[<o]True@'
+
+        result_false = Printy._repr_value(False)
+        result_true = Printy._repr_value(True)
+
+        self.assertEqual(expected_false, result_false)
+        self.assertEqual(expected_true, result_true)
+
+    def test_print_none(self):
+        expected_none = '[<o]None@'
+        result_none = Printy._repr_value(None)
+
+        self.assertEqual(expected_none, result_none)
 
 
 class TestInputy(unittest.TestCase):

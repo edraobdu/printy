@@ -243,10 +243,12 @@ class Printy:
             else:
                 if isinstance(nested_obj, str):
                     return "[c>]\'" + cls._escape_special_chars(nested_obj) + "\'@"
+                elif isinstance(nested_obj, bool) or nested_obj is None:
+                    return "[<o]" + cls._escape_special_chars(nested_obj) + "@"
                 elif isinstance(nested_obj, (int, float)):
-                    return "[c]" + cls._escape_special_chars(nested_obj) + "@"
+                    return "[c]" + str(nested_obj) + "@"
                 else:
-                    return "[m>]" + cls._escape_special_chars(nested_obj) + "@"
+                    return str(nested_obj)
         return _nested(obj)
 
     @classmethod
@@ -261,6 +263,10 @@ class Printy:
                 return cls._pretty_print_object(value, indentation)
             else:
                 return cls._escape_special_chars(value)
+        elif isinstance(value, bool) or value is None:
+            return "[<o]" + str(value) + "@"
+        elif isinstance(value, (int, float)):
+            return "[c]" + str(value) + "@"
         else:
             return str(value)
 
@@ -359,7 +365,7 @@ class Printy:
 
         # the only options allowed are '+' and '-'
         error_msg = (
-                "\t[r>]Invalid Value:@ [o]%s@ is not a valid number" % value
+            "\t[r>]Invalid Value:@ [o]%s@ is not a valid number" % value
         )
         # Let's try to convert it to the number type
         valid_value = False
