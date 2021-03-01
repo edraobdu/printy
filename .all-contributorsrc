@@ -58,6 +58,15 @@
       "contributions": [
         "ideas"
       ]
+    },
+    {
+      "login": "obentham",
+      "name": "Oliver Bentham",
+      "avatar_url": "https://avatars.githubusercontent.com/u/22358748?v=4",
+      "profile": "https://github.com/obentham",
+      "contributions": [
+        "userTesting"
+      ]
     }
   ],
   "contributorsPerLine": 7,
