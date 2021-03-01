@@ -354,6 +354,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/mihirs16"><img src="https://avatars3.githubusercontent.com/u/44063783?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mihir Singh</b></sub></a><br /><a href="https://github.com/edraobdu/printy/commits?author=mihirs16" title="Tests">⚠️</a> <a href="https://github.com/edraobdu/printy/commits?author=mihirs16" title="Code">💻</a></td>
     <td align="center"><a href="https://soundcloud.com/lalalaaalala"><img src="https://avatars1.githubusercontent.com/u/7810348?v=4?s=100" width="100px;" alt=""/><br /><sub><b>musicprogram</b></sub></a><br /><a href="#userTesting-musicprogram" title="User Testing">📓</a></td>
     <td align="center"><a href="https://github.com/Tams-Tams"><img src="https://avatars.githubusercontent.com/u/63205558?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Tanmay</b></sub></a><br /><a href="#ideas-Tams-Tams" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://github.com/obentham"><img src="https://avatars.githubusercontent.com/u/22358748?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Oliver Bentham</b></sub></a><br /><a href="#userTesting-obentham" title="User Testing">📓</a></td>
   </tr>
 </table>
 
