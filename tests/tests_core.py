@@ -12,6 +12,7 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
         self.sample_text = "Some Text To Print Out"
         self.printy = Printy()
         self.raw_text = self.printy.get_formatted_text
+        self.esc = self.printy.escape
 
     def test_empty_value(self):
         """ Tests passing an empty value print's nothing"""
@@ -116,6 +117,17 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
 
         self.assertTrue(result_one == result_two == result_three)
 
+    def test_escape_with_global_flags(self):
+        """
+        Test escaping values with global flags
+        """
+        text = '[n]escaped@'
+        expected_text = '\x1b[38;5;196m[n]escaped@\x1b[0m'
+        result = self.raw_text(self.esc(text), 'r')
+
+        self.assertEqual(result, expected_text)
+
+
     @mock.patch('printy.core.Printy.set_windows_console_mode', return_value=True)
     def test_virtual_terminal_processing_on_windows(self, mock_console_mode):
         """
@@ -147,6 +159,7 @@ class TestInlineFlagsPrinty(unittest.TestCase):
     def setUp(self):
         self.printy = Printy()
         self.raw_text = self.printy.get_formatted_text
+        self.esc = self.printy.escape
 
     def test_inline_format_with_global_flags(self):
         """
@@ -355,6 +368,16 @@ class TestInlineFlagsPrinty(unittest.TestCase):
         result_none = Printy._repr_value(None)
 
         self.assertEqual(expected_none, result_none)
+
+    def test_escape_with_inline_flags(self):
+        """
+        Test escaping values on inline formats
+        """
+        email = 'escaped@gmail.com'        
+        expected_text = '\x1b[38;5;28mescaped@gmail.com\x1b[0m'
+        result = self.raw_text(f'[n]{self.esc(email)}@')
+
+        self.assertEqual(result, expected_text)
 
 
 class TestInputy(unittest.TestCase):

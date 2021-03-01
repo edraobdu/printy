@@ -25,6 +25,9 @@ printy = printy_instance.format
 # Main function to extend input() functionality
 inputy = printy_instance.format_input
 
+# Escaping function for untrusted sources
+escape = printy_instance.escape
+
 # shortcut to get a list of the available flags and formats
 available_flags = Flags.get_flags().keys()
 COLORS = list(filter(lambda c: c.islower(), available_flags))
