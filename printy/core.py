@@ -324,6 +324,15 @@ class Printy:
             value, flags, predefined, pretty, indentation), end=end
         )
 
+    def escape(self, value):
+        """
+        Escape the special characters of the value passed to printy. Useful
+        for untrusted sources.
+        """
+        for char in self.special_chars:
+            value = value.replace(char, '\{}'.format(char))
+        return value
+
     ##### ============= INPUTY ======================
 
     # Types (str is the default)

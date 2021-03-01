@@ -28,6 +28,8 @@ an amazing library that let's you do much more cool things!!</sub>_
 2. [How to use it?](#how-to-use-it)
     1. [Using global flags](#using-global-flags)
     2. [Using inline flags](#using-inline-flags)
+    3. [Untrusted sources](#untrusted-sources)
+    4. [Background Colors](#background-colors)
 3. [What about input()?](#what-about-input)
 4. [Curious?](#curious)
 5. [API](#api)
@@ -140,6 +142,47 @@ printy(my_dict, indentation=2)
 ```
 
 ![Printy pretty dict](.github/printy_pretty_dict_two_indentation.png)
+
+### New in v2.2.0
+
+#### Untrusted sources
+
+When dealing with untrusted sources, like, user input, we need to ensure the text is properly escaped
+before we pass it to printy. For that, we can use the funtion `escape` integrated with printy.
+
+Let's say we have and `email` variable that it's fill by an untrusted source:
+
+```python
+from printy import printy, escape
+
+# Comes from an untrusted source
+email = 'example@example.com'
+
+# Without escaping it
+printy(f'This is your email: [nB]{email}@')
+
+# Escaping it
+printy(f'This is your email: [nB]{escape(email)}@')
+```
+![Printy escape](.github/escape_printy.png)
+
+### New in v2.2.0
+
+#### Background Colors
+
+Now, we can define the background color of the text, either on inline formats or with global flags, we simply pass the color flag between two brackets:
+
+```python
+from printy import printy
+
+# Global format
+printy('Green bold text over a red background', 'nB{r}')
+
+# Inline format
+printy('Normal Text [nB{r}]Green bold text over a red background@ Also normal')
+```
+
+![Printy background](.github/background_printy.png)
 
 ## What about input()?
 

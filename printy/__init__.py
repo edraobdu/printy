@@ -10,7 +10,7 @@ to the data the final user is entering by the console
 from .core import Printy
 from .flags import Flags
 
-__version__ = "2.1.1"
+__version__ = "2.2.0"
 
 __all__ = ['raw_format', 'printy', 'inputy', 'COLORS', 'FORMATS']
 
@@ -24,6 +24,9 @@ printy = printy_instance.format
 
 # Main function to extend input() functionality
 inputy = printy_instance.format_input
+
+# Escaping function for untrusted sources
+escape = printy_instance.escape
 
 # shortcut to get a list of the available flags and formats
 available_flags = Flags.get_flags().keys()
