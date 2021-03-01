@@ -152,6 +152,26 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
 
         self.assertEqual(result_one, self.sample_text)
 
+    def test_background_color_with_global_flags(self):
+        """
+        Test backgroun color with global flags
+        """
+        flags = 'yB{o}'
+        text = 'Hello'
+        expected_text = '\x1b[48;5;208;38;5;11;1mHello\x1b[0m'
+
+        self.assertEqual(self.raw_text(text, flags), expected_text)
+
+    def test_background_color_no_flag_with_global_flags(self):
+        """
+        Test backgroun color with no flag for it, with global flags
+        """
+        flags = 'yB{}'
+        text = 'Hello'
+        expected_text = '\x1b[38;5;11;1mHello\x1b[0m'
+
+        self.assertEqual(self.raw_text(text, flags), expected_text)
+
 
 class TestInlineFlagsPrinty(unittest.TestCase):
     """ Test case for inline formatting """
@@ -378,6 +398,23 @@ class TestInlineFlagsPrinty(unittest.TestCase):
         result = self.raw_text(f'[n]{self.esc(email)}@')
 
         self.assertEqual(result, expected_text)
+
+    def test_background_color_with_inline_flags(self):
+        """
+        Test backgroun color with inline flags
+        """        
+        text = '[yB{o}]Hello@'
+        expected_text = '\x1b[48;5;208;38;5;11;1mHello\x1b[0m'
+
+        self.assertEqual(self.raw_text(text), expected_text)
+
+    def test_background_color_no_flag_with_global_flags(self):
+        """
+        Test backgroun color with no flag for it, with global flags
+        """
+        text = '[yB{}]Hello@'
+        expected_text = '\x1b[38;5;11;1mHello\x1b[0m'
+        self.assertEqual(self.raw_text(text), expected_text)
 
 
 class TestInputy(unittest.TestCase):
