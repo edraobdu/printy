@@ -7,8 +7,8 @@ to the data the final user is entering by the console
 
 """
 
-from printy.core import Printy
-from printy.flags import Flags
+from printy.printy.core import Printy
+from printy.printy.flags import Flags
 
 __version__ = "2.2.0"
 
