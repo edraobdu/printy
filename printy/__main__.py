@@ -6,5 +6,5 @@ by running python -m printy
 from . import printy
 
 if __name__ == '__main__':
-    from .helpme import helpme
+    from printy.helpme import helpme
     printy(helpme)
