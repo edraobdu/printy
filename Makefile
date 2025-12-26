@@ -91,4 +91,9 @@ setup:  ## One-time local development setup
 	uv python install 3.14
 	@echo "Syncing dependencies..."
 	uv sync --all-extras
+	@echo "Installing pre-commit hooks..."
+	uv run pre-commit install
 	@echo "Setup complete! Virtual environment ready at .venv/"
+
+pre-commit:  ## Run pre-commit hooks on all files
+	uv run pre-commit run --all-files

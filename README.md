@@ -179,29 +179,71 @@ printy('Normal Text [nB{r}]Green bold text over a red background@ Also normal')
 
 ![Printy background](.github/background_printy.png)
 
-## Curious?
+## Integration with Other Libraries
 
-If you want to know what's behind the scenes, you can get the text with all the ANSI escaped sequences,
-for that, use the ```raw_format()``` function.
+Sometimes you need to get the formatted text with ANSI escape sequences without printing it directly. This is useful when integrating printy with other libraries or when you need to pass formatted strings to other functions. For this, printy provides the `raw()` function (also available as `raw_format()` for backward compatibility).
+
+### Getting Formatted Text
+
+The `raw()` function returns the text with all ANSI escape codes applied:
 
 ```python
-from printy import raw_format
-raw_text = raw_format("Some [rB]formatted@ [yIU]text@")
-print(repr(raw_text))  
-print(raw_text)
+from printy import raw
+
+# Get formatted text as a string
+formatted = raw("Some [rB]formatted@ [yIU]text@")
+print(repr(formatted))  # Shows the ANSI escape codes
+print(formatted)        # Displays the formatted text
 ```
 
 ![Printy raw format](.github/printy_raw_format.png)
 
-For convenience, we have stored all colors and formats flags in list, in case you need them:
+### Integration Example: Using with Tabulate
+
+Here's an example of how you can use `raw()` to integrate printy with other libraries. In this case, we'll use `tabulate` to create tables with colorful, formatted headers:
+
+```python
+from printy import raw
+
+# This example shows how to integrate printy with other tools
+# You can use this same pattern with any library that accepts strings
+# If you want to try this specific example: pip install tabulate
+try:
+    from tabulate import tabulate
+
+    data = [
+        ["Alice", 25, "Engineering"],
+        ["Bob", 30, "Marketing"],
+        ["Charlie", 35, "Sales"]
+    ]
+
+    # Use raw() to create formatted strings for headers
+    headers = [
+        raw("[cB]Name@"),           # Cyan bold
+        raw("[yB]Age@"),            # Yellow bold
+        raw("[nB]Department@")      # Green bold
+    ]
+
+    print(tabulate(data, headers=headers, tablefmt="grid"))
+except ImportError:
+    print("Install tabulate to try this example: pip install tabulate")
+```
+
+This creates a table with colorful, bold headers. You can use the same pattern to integrate printy's formatting with any other library that accepts string inputs.
+
+### Available Colors and Formats
+
+For convenience, all color and format flags are available as constants:
 
 ```python
 from printy import COLORS, FORMATS
-print(COLORS)
-print(FORMATS)
+print(COLORS)    # List of all available color flags
+print(FORMATS)   # List of all available format flags
 ```
 
 ![Printy COLORS FORMATS](.github/printy_COLORS_FORMATS.png)
+
+**Note:** `raw_format()` is still available as an alias for `raw()` to maintain backward compatibility with existing code.
 
 ## API
 

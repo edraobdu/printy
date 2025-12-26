@@ -35,6 +35,7 @@ Issues = "https://github.com/edraobdu/printy/issues"
 dev = [
     "coverage>=7.0.0",
     "ruff>=0.1.0",
+    "pre-commit>=3.0.0",
 ]
 
 [tool.setuptools.packages.find]
@@ -69,3 +70,4 @@ exclude_lines = [
     "if __name__ == .__main__.:",
 ]
 show_missing = true
+fail_under = 90

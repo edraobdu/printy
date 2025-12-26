@@ -2,12 +2,12 @@ import platform
 
 from .flags import Flags
 
-LINUX = 'Linux'
-WINDOWS = 'Windows'
-OSX = 'Darwin'
+LINUX = "Linux"
+WINDOWS = "Windows"
+OSX = "Darwin"
 
 # For format() and format_input()
-default_end = '\n'
+default_end = "\n"
 
 
 class Printy:
@@ -21,16 +21,16 @@ class Printy:
     """
 
     # For inline formatting we'll use special characters to catch the flags
-    end_format_char = '@'
-    open_flag_char = '['
-    close_flag_char = ']'
+    end_format_char = "@"
+    open_flag_char = "["
+    close_flag_char = "]"
     special_chars = [end_format_char, open_flag_char, close_flag_char]
 
     # Actions for inline formats
-    START_FLAGS = 'start_flags'
-    START_FORMAT = 'start_format'
-    END_FORMAT = 'end_format'
-    ESCAPE_CHAR = 'escape_char'
+    START_FLAGS = "start_flags"
+    START_FORMAT = "start_format"
+    END_FORMAT = "end_format"
+    ESCAPE_CHAR = "escape_char"
 
     def __init__(self):
         self.platform = platform.system()
@@ -49,6 +49,7 @@ class Printy:
         if self.platform == WINDOWS:
             try:
                 from ctypes import windll
+
                 k = windll.kernel32
                 k.SetConsoleMode(k.GetStdHandle(-11), 7)
                 return True
@@ -70,7 +71,7 @@ class Printy:
         Returns True if it's a special character
         """
         if current in cls.special_chars:
-            if prev != '\\':
+            if prev != "\\":
                 return True
         return False
 
@@ -105,9 +106,9 @@ class Printy:
 
     @classmethod
     def _replace_escaped(cls, text: str) -> str:
-        """ Replaces escaped special characters for the character itself """
+        """Replaces escaped special characters for the character itself"""
         for special_char in cls.special_chars:
-            text = text.replace('\\' + special_char, special_char)
+            text = text.replace("\\" + special_char, special_char)
         return text
 
     @classmethod
@@ -119,7 +120,7 @@ class Printy:
         "[rB]Some@ Te[H]xt@"
         We'll get the list [('Some', 'rB), (' Te', None), ('xt', 'H')]
         """
-        prev = ''  # Stores the last character in the loop
+        prev = ""  # Stores the last character in the loop
         last_special_char = None
         list_of_formats = []  # Final list to be returned
 
@@ -136,8 +137,7 @@ class Printy:
         for char in text:
             is_special = cls._define_char(prev, char)
             if is_special:
-                action = cls._check_special_char_position(last_special_char,
-                                                          char)
+                action = cls._check_special_char_position(last_special_char, char)
 
                 if action == cls.ESCAPE_CHAR:
                     # Add the character to the text
@@ -169,10 +169,12 @@ class Printy:
             if counter == len(text) or close_section:
                 # Reset the 'section_*' lists and add them (joined)
                 # to the final list
-                list_of_formats.append((
-                    ''.join(section_text),
-                    ''.join(section_flags) if len(section_flags) > 0 else None
-                ))
+                list_of_formats.append(
+                    (
+                        "".join(section_text),
+                        "".join(section_flags) if len(section_flags) > 0 else None,
+                    )
+                )
                 section_text = []
                 section_flags = []
                 close_section = False
@@ -181,9 +183,9 @@ class Printy:
 
     @classmethod
     def _get_cleaned_text(cls, text: str) -> str:
-        """ Returns the cleaned value, with no formats """
+        """Returns the cleaned value, with no formats"""
         tuple_text = cls._get_inline_format_as_tuple(text)
-        return cls._replace_escaped(''.join(x[0] for x in tuple_text))
+        return cls._replace_escaped("".join(x[0] for x in tuple_text))
 
     @classmethod
     def _escape_special_chars(cls, value):
@@ -193,7 +195,7 @@ class Printy:
         """
         _str = str(value)
         for char in cls.special_chars:
-            _str = _str.replace(char, '\\' + char)
+            _str = _str.replace(char, "\\" + char)
         return _str
 
     @classmethod
@@ -208,46 +210,63 @@ class Printy:
             indentation_braces = " " * indentation * (nested_level - 1)
             if isinstance(nested_obj, dict):
                 return "{\n%(body)s%(indent_braces)s}" % {
-                    "body": "".join("%(indent_values)s[n>]\'%(key)s\'@: %(value)s[<oB],@\n" % {
-                        "key": str(key),
-                        "value": _nested(value, nested_level + 1),
-                        "indent_values": indentation_values
-                    } for key, value in nested_obj.items()),
-                    "indent_braces": indentation_braces
+                    "body": "".join(
+                        "%(indent_values)s[n>]'%(key)s'@: %(value)s[<oB],@\n"
+                        % {
+                            "key": str(key),
+                            "value": _nested(value, nested_level + 1),
+                            "indent_values": indentation_values,
+                        }
+                        for key, value in nested_obj.items()
+                    ),
+                    "indent_braces": indentation_braces,
                 }
             elif isinstance(nested_obj, list):
-                return "\[\n%(indent_values)s%(body)s\n%(indent_braces)s\]" % {
-                    "body": "[<oB],@ ".join("%(value)s" % {
-                        "value": _nested(value, nested_level + 1),
-                    } for value in nested_obj),
+                return "\\[\n%(indent_values)s%(body)s\n%(indent_braces)s\\]" % {
+                    "body": "[<oB],@ ".join(
+                        "%(value)s"
+                        % {
+                            "value": _nested(value, nested_level + 1),
+                        }
+                        for value in nested_obj
+                    ),
                     "indent_braces": indentation_braces,
-                    "indent_values": indentation_values
+                    "indent_values": indentation_values,
                 }
             elif isinstance(nested_obj, tuple):
                 return "(\n%(indent_values)s%(body)s\n%(indent_braces)s)" % {
-                    "body": "[<oB],@ ".join("%(value)s" % {
-                        "value": _nested(value, nested_level + 1),
-                    } for value in nested_obj),
+                    "body": "[<oB],@ ".join(
+                        "%(value)s"
+                        % {
+                            "value": _nested(value, nested_level + 1),
+                        }
+                        for value in nested_obj
+                    ),
                     "indent_braces": indentation_braces,
-                    "indent_values": indentation_values
+                    "indent_values": indentation_values,
                 }
             elif isinstance(nested_obj, set):
                 return "{\n%(indent_values)s%(body)s\n%(indent_braces)s}" % {
-                    "body": "[<oB],@ ".join("%(value)s" % {
-                        "value": _nested(value, nested_level + 1),
-                    } for value in nested_obj),
+                    "body": "[<oB],@ ".join(
+                        "%(value)s"
+                        % {
+                            "value": _nested(value, nested_level + 1),
+                        }
+                        for value in nested_obj
+                    ),
                     "indent_braces": indentation_braces,
-                    "indent_values": indentation_values
+                    "indent_values": indentation_values,
                 }
             else:
                 if isinstance(nested_obj, str):
-                    return "[c>]\'" + cls._escape_special_chars(nested_obj) + "\'@"
+                    return "[c>]'" + cls._escape_special_chars(nested_obj) + "'@"
                 elif isinstance(nested_obj, bool) or nested_obj is None:
                     return "[<o]" + cls._escape_special_chars(nested_obj) + "@"
                 elif isinstance(nested_obj, (int, float)):
                     return "[c]" + str(nested_obj) + "@"
                 else:
                     return str(nested_obj)
+
         return _nested(obj)
 
     @classmethod
@@ -269,8 +288,15 @@ class Printy:
         else:
             return str(value)
 
-    def get_formatted_text(self, value: str, flags: str = '', predefined: str = '',
-                           pretty: bool = True, indentation: int = 4, **kwargs) -> str:
+    def get_formatted_text(
+        self,
+        value: str,
+        flags: str = "",
+        predefined: str = "",
+        pretty: bool = True,
+        indentation: int = 4,
+        **kwargs,
+    ) -> str:
         """
         Applies the format specified by the 'flags' to the 'value'.
 
@@ -288,11 +314,11 @@ class Printy:
                 text = "%s%s%s" % (
                     Flags.join_flags(flags_values),
                     value,
-                    Flags.get_end_of_line()
+                    Flags.get_end_of_line(),
                 )
             else:
                 tuple_text = self._get_inline_format_as_tuple(value)
-                text = ''
+                text = ""
                 for section in tuple_text:
                     section_text = self._replace_escaped(section[0])
                     section_flags = section[1] or predefined
@@ -301,7 +327,7 @@ class Printy:
                         text += "%s%s%s" % (
                             Flags.join_flags(flags_values),
                             section_text,
-                            Flags.get_end_of_line()
+                            Flags.get_end_of_line(),
                         )
                     else:
                         text += section_text
@@ -309,18 +335,27 @@ class Printy:
 
     @staticmethod
     def read_file(file: str) -> str:
-        """ Given a file path, we read it and print it out """
+        """Given a file path, we read it and print it out"""
         file = str(file)
         with open(file) as f:
             text = f.read()
         return text
 
-    def format(self, value='', flags='', predefined='', file='',
-               end=default_end, pretty=True, indentation=4):
-        """ Prints out the value """
+    def format(
+        self,
+        value="",
+        flags="",
+        predefined="",
+        file="",
+        end=default_end,
+        pretty=True,
+        indentation=4,
+    ):
+        """Prints out the value"""
         value = self.read_file(file) if file else value
-        print(self.get_formatted_text(
-            value, flags, predefined, pretty, indentation), end=end
+        print(
+            self.get_formatted_text(value, flags, predefined, pretty, indentation),
+            end=end,
         )
 
     def escape(self, value):
@@ -329,5 +364,5 @@ class Printy:
         for untrusted sources.
         """
         for char in self.special_chars:
-            value = value.replace(char, '\{}'.format(char))
+            value = value.replace(char, r"\{}".format(char))
         return value

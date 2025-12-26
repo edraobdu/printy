@@ -1,12 +1,13 @@
 import unittest
 from unittest import mock
+
+from printy.core import WINDOWS, Printy
 from printy.exceptions import InvalidFlag
-from printy.core import Printy, WINDOWS
 from printy.flags import Flags
 
 
 class TestGlobalFlagsPrinty(unittest.TestCase):
-    """ Test case for formatting with a global set of flags specified """
+    """Test case for formatting with a global set of flags specified"""
 
     def setUp(self):
         self.sample_text = "Some Text To Print Out"
@@ -15,8 +16,8 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
         self.esc = self.printy.escape
 
     def test_empty_value(self):
-        """ Tests passing an empty value print's nothing"""
-        text = ''
+        """Tests passing an empty value print's nothing"""
+        text = ""
         result = self.raw_text(text)
 
         self.assertEqual(result, text)
@@ -26,12 +27,12 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
         Tests that passing and empty value with some flags returns the
         escape ansi characters
         """
-        text = ''
-        flags = 'rBH'
+        text = ""
+        flags = "rBH"
         result = self.raw_text(text, flags)
         expected_result = "%s%s" % (
-                Flags.join_flags(Flags.get_flag_values(flags)),
-                Flags.get_end_of_line()
+            Flags.join_flags(Flags.get_flag_values(flags)),
+            Flags.get_end_of_line(),
         )
 
         self.assertEqual(result, expected_result)
@@ -41,7 +42,7 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
         Tests that passing an invalid flag (only one)
         raises and exception
         """
-        invalid_flag = 'P'
+        invalid_flag = "P"
         with self.assertRaises(InvalidFlag):
             self.printy.format(self.sample_text, invalid_flag)
 
@@ -52,19 +53,19 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
         """
         # P and G are invalid, should raise InvalidFlag
         # with 'P' as invalid flag
-        flags = 'yBPGr'
+        flags = "yBPGr"
         with self.assertRaises(InvalidFlag) as e:
             self.printy.format(self.sample_text, flags)
-        self.assertEqual(e.exception.flag, 'P')
+        self.assertEqual(e.exception.flag, "P")
 
     def test_high_intensity_flag_color(self):
         """
         Checks the correct format is returned for a high
         intensity (>) flag color
         """
-        flag = 'p>'
-        text = 'Hello'
-        expected_text = '\x1b[38;5;98mHello\x1b[0m'
+        flag = "p>"
+        text = "Hello"
+        expected_text = "\x1b[38;5;98mHello\x1b[0m"
 
         self.assertEqual(self.raw_text(text, flag), expected_text)
 
@@ -73,9 +74,9 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
         Checks the correct format is returned for a low
         intensity (<) flag color
         """
-        flag = '<p'
-        text = 'Hello'
-        expected_text = '\x1b[38;5;54mHello\x1b[0m'
+        flag = "<p"
+        text = "Hello"
+        expected_text = "\x1b[38;5;54mHello\x1b[0m"
 
         self.assertEqual(self.raw_text(text, flag), expected_text)
 
@@ -83,7 +84,7 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
         """
         Tests that the returned text is always ended with the closing tag
         """
-        result = self.raw_text(self.sample_text, 'r')
+        result = self.raw_text(self.sample_text, "r")
         closing_tag = result[-4:]
         self.assertEqual(len(closing_tag), 4)
         self.assertEqual(closing_tag, Flags.get_end_of_line())
@@ -100,7 +101,7 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
         Test that passing and empty string as a flag still returns the
         default value
         """
-        result = self.raw_text(self.sample_text, '')
+        result = self.raw_text(self.sample_text, "")
         self.assertEqual(result, self.sample_text)
 
     def test_flags_with_spaces_in_between(self):
@@ -108,9 +109,9 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
         Tests that passing a set of flags with some spaces in between
         (like 'yB H U') still applies the desired formats
         """
-        desired_flags = 'yBH'
-        flags_with_one_space = 'yB H'
-        flags_with_multiple_spaces = 'y B H'
+        desired_flags = "yBH"
+        flags_with_one_space = "yB H"
+        flags_with_multiple_spaces = "y B H"
         result_one = self.raw_text(self.sample_text, desired_flags)
         result_two = self.raw_text(self.sample_text, flags_with_one_space)
         result_three = self.raw_text(self.sample_text, flags_with_multiple_spaces)
@@ -121,14 +122,13 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
         """
         Test escaping values with global flags
         """
-        text = '[n]escaped@'
-        expected_text = '\x1b[38;5;196m[n]escaped@\x1b[0m'
-        result = self.raw_text(self.esc(text), 'r')
+        text = "[n]escaped@"
+        expected_text = "\x1b[38;5;196m[n]escaped@\x1b[0m"
+        result = self.raw_text(self.esc(text), "r")
 
         self.assertEqual(result, expected_text)
 
-
-    @mock.patch('printy.core.Printy.set_windows_console_mode', return_value=True)
+    @mock.patch("printy.core.Printy.set_windows_console_mode", return_value=True)
     def test_virtual_terminal_processing_on_windows(self, mock_console_mode):
         """
         Tests that if platform is windows, then then returns True
@@ -143,7 +143,7 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
         Tests that if printy virtual_console_mode is false, then it returns the
         cleaned_text
         """
-        flags = 'rBH'
+        flags = "rBH"
         # Changes platform to Windows
         self.printy.platform = WINDOWS
         self.printy.virtual_terminal_processing = False
@@ -156,9 +156,9 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
         """
         Test backgroun color with global flags
         """
-        flags = 'yB{o}'
-        text = 'Hello'
-        expected_text = '\x1b[48;5;208;38;5;11;1mHello\x1b[0m'
+        flags = "yB{o}"
+        text = "Hello"
+        expected_text = "\x1b[48;5;208;38;5;11;1mHello\x1b[0m"
 
         self.assertEqual(self.raw_text(text, flags), expected_text)
 
@@ -166,15 +166,15 @@ class TestGlobalFlagsPrinty(unittest.TestCase):
         """
         Test backgroun color with no flag for it, with global flags
         """
-        flags = 'yB{}'
-        text = 'Hello'
-        expected_text = '\x1b[38;5;11;1mHello\x1b[0m'
+        flags = "yB{}"
+        text = "Hello"
+        expected_text = "\x1b[38;5;11;1mHello\x1b[0m"
 
         self.assertEqual(self.raw_text(text, flags), expected_text)
 
 
 class TestInlineFlagsPrinty(unittest.TestCase):
-    """ Test case for inline formatting """
+    """Test case for inline formatting"""
 
     def setUp(self):
         self.printy = Printy()
@@ -187,8 +187,8 @@ class TestInlineFlagsPrinty(unittest.TestCase):
         set of flags takes this last one as the format to be applied
         """
         inline_formatted = "[y]Hey you@"
-        no_format = 'Hey you'
-        global_flags = 'rB'
+        no_format = "Hey you"
+        global_flags = "rB"
         result_one = self.raw_text(inline_formatted, global_flags)
         result_two = self.raw_text(no_format, global_flags)
 
@@ -199,18 +199,18 @@ class TestInlineFlagsPrinty(unittest.TestCase):
         Tests that passing an inline formatted text without the ending
         formatting character still returns the formatted text
         """
-        result_one = self.raw_text('[y]Hey you')
-        result_two = self.raw_text('[y]Hey you@')
+        result_one = self.raw_text("[y]Hey you")
+        result_two = self.raw_text("[y]Hey you@")
 
         self.assertEqual(result_one, result_two)
 
     def test_escape_special_characters(self):
-        """ Tests that escaping special characters prints them out """
-        inline_text_one = '[y]myemail\@mydomain.com@'
-        global_text_one = 'myemail@mydomain.com', 'y'
+        """Tests that escaping special characters prints them out"""
+        inline_text_one = r"[y]myemail\@mydomain.com@"
+        global_text_one = "myemail@mydomain.com", "y"
 
-        inline_text_two = '[bH]Some text \@@'
-        global_text_two = 'Some text @', 'bH'
+        inline_text_two = r"[bH]Some text \@@"
+        global_text_two = "Some text @", "bH"
 
         inline_result_one = self.raw_text(inline_text_one)
         global_result_one = self.raw_text(global_text_one[0], global_text_one[1])
@@ -222,26 +222,28 @@ class TestInlineFlagsPrinty(unittest.TestCase):
         self.assertEqual(inline_result_two, global_result_two)
 
     def test_multiple_sections(self):
-        """ Test that formats are applied correctly to each section """
+        """Test that formats are applied correctly to each section"""
 
         section_one = "Some"
-        section_two = ' '
-        section_three = 'text'
-        global_format_one = self.raw_text(section_one, 'rB')
+        section_two = " "
+        section_three = "text"
+        global_format_one = self.raw_text(section_one, "rB")
         global_format_two = self.raw_text(section_two)
-        global_format_three = self.raw_text(section_three, 'y')
-        joined_global_format = global_format_one + global_format_two + global_format_three
+        global_format_three = self.raw_text(section_three, "y")
+        joined_global_format = (
+            global_format_one + global_format_two + global_format_three
+        )
 
-        inline_text = '[rB]Some@ [y]text@'
+        inline_text = "[rB]Some@ [y]text@"
         inline_format = self.raw_text(inline_text)
 
         self.assertEqual(inline_format, joined_global_format)
 
     def test_read_file(self):
-        """ Test retrieving the text from a file """
-        text_in_file = 'printy'
-        file_name = 'printy_file'
-        with mock.patch('builtins.open', mock.mock_open(read_data=text_in_file)) as m:
+        """Test retrieving the text from a file"""
+        text_in_file = "printy"
+        file_name = "printy_file"
+        with mock.patch("builtins.open", mock.mock_open(read_data=text_in_file)) as m:
             result = self.printy.read_file(file_name)
 
         m.assert_called_once_with(file_name)
@@ -252,88 +254,89 @@ class TestInlineFlagsPrinty(unittest.TestCase):
         Test escaping especial characters correctly, this method is used when
         an object other than a string is passed
         """
-        text_to_escape = '[some text @ ]'
-        expected_value = '\[some text \@ \]'
+        text_to_escape = "[some text @ ]"
+        expected_value = r"\[some text \@ \]"
         escaped_text = Printy._escape_special_chars(text_to_escape)
 
         self.assertEqual(expected_value, escaped_text)
 
     def test_pretty_print_dicts(self):
-        """ Test pretty printing dictionaries """
-        dict_to_print = {'name': 'John Doe', 'age': 34}
-        expected_result = '{\n    [n>]\'name\'@: [c>]\'John Doe\'@[<oB],@\n    [n>]\'age\'@: [c]34@[<oB],@\n}'
+        """Test pretty printing dictionaries"""
+        dict_to_print = {"name": "John Doe", "age": 34}
+        expected_result = "{\n    [n>]'name'@: [c>]'John Doe'@[<oB],@\n    [n>]'age'@: [c]34@[<oB],@\n}"
         pretty_dict = Printy._repr_value(dict_to_print)
 
         self.assertEqual(expected_result, pretty_dict)
 
     def test_pretty_print_lists(self):
-        """ Test pretty printing lists """
-        list_to_print = [1, 2, 'hello']
-        expected_result = '\[\n    [c]1@[<oB],@ [c]2@[<oB],@ [c>]\'hello\'@\n\]'
+        """Test pretty printing lists"""
+        list_to_print = [1, 2, "hello"]
+        expected_result = "\\[\n    [c]1@[<oB],@ [c]2@[<oB],@ [c>]'hello'@\n\\]"
         pretty_list = Printy._repr_value(list_to_print)
 
         self.assertEqual(expected_result, pretty_list)
 
     def test_pretty_printy_tuples(self):
-        """ Test pretty printing tuples """
-        tuple_to_print = (1, 2, 'hello')
-        expected_result = '(\n    [c]1@[<oB],@ [c]2@[<oB],@ [c>]\'hello\'@\n)'
+        """Test pretty printing tuples"""
+        tuple_to_print = (1, 2, "hello")
+        expected_result = "(\n    [c]1@[<oB],@ [c]2@[<oB],@ [c>]'hello'@\n)"
         pretty_tuple = Printy._repr_value(tuple_to_print)
 
         self.assertEqual(expected_result, pretty_tuple)
 
     def test_pretty_printy_sets(self):
-        """ Test pretty printing sets """
-        set_to_print = {1, 2, 'hello'}
-        expected_result = '{\n    [c]1@[<oB],@ [c]2@[<oB],@ [c>]\'hello\'@\n}'
+        """Test pretty printing sets"""
+        set_to_print = {1, 2, "hello"}
+        expected_result = "{\n    [c]1@[<oB],@ [c]2@[<oB],@ [c>]'hello'@\n}"
         pretty_set = Printy._repr_value(set_to_print)
 
         self.assertEqual(expected_result, pretty_set)
 
     def test_pretty_printy_dict_pretty_false(self):
-        """ Tests pretty printing a dict when 'pretty' parameter is set to False """
-        dict_to_print = {'name': 'John Doe', 'age': 34}
-        expected_result = '{\'name\': \'John Doe\', \'age\': 34}'
+        """Tests pretty printing a dict when 'pretty' parameter is set to False"""
+        dict_to_print = {"name": "John Doe", "age": 34}
+        expected_result = "{'name': 'John Doe', 'age': 34}"
         not_pretty_dict = Printy._repr_value(dict_to_print, pretty=False)
 
         self.assertEqual(expected_result, not_pretty_dict)
 
     def test_pretty_printy_list_pretty_false(self):
-        """ Tests pretty printing a list when 'pretty' parameter is set to False """
-        list_to_print = [1, 2, 'hello']
-        expected_result = '\[1, 2, \'hello\'\]'
+        """Tests pretty printing a list when 'pretty' parameter is set to False"""
+        list_to_print = [1, 2, "hello"]
+        expected_result = "\\[1, 2, 'hello'\\]"
         not_pretty_list = Printy._repr_value(list_to_print, pretty=False)
 
         self.assertEqual(expected_result, not_pretty_list)
 
     def test_pretty_printy_tuple_pretty_false(self):
-        """ Tests pretty printing a tuple when 'pretty' parameter is set to False """
-        tuple_to_print = (1, 2, 'hello')
-        expected_result = '(1, 2, \'hello\')'
+        """Tests pretty printing a tuple when 'pretty' parameter is set to False"""
+        tuple_to_print = (1, 2, "hello")
+        expected_result = "(1, 2, 'hello')"
         not_pretty_tuple = Printy._repr_value(tuple_to_print, pretty=False)
 
         self.assertEqual(expected_result, not_pretty_tuple)
 
     def test_pretty_printy_set_pretty_false(self):
-        """ Tests pretty printing a set when 'pretty' parameter is set to False """
-        set_to_print = {1, 2, 'hello'}
-        expected_result = '{1, 2, \'hello\'}'
+        """Tests pretty printing a set when 'pretty' parameter is set to False"""
+        set_to_print = {1, 2, "hello"}
+        expected_result = "{1, 2, 'hello'}"
         not_pretty_set = Printy._repr_value(set_to_print, pretty=False)
 
         self.assertEqual(expected_result, not_pretty_set)
 
     def test_pretty_print_str_method_of_objects(self):
-        """ Test printing the str method of an object, both not defined and defined """
+        """Test printing the str method of an object, both not defined and defined"""
         builtin_obj = int
-        expected_builtin_result = '<class \'int\'>'
+        expected_builtin_result = "<class 'int'>"
         pretty_builtin = Printy._repr_value(builtin_obj)
 
         class Person:
             def __str__(self):
-                return '[c]I am a person@'
+                return "[c]I am a person@"
+
         custom_str = Person()
         # Notice how it should not return the escaped character
-        expected_custom_result = '[c]I am a person@'
+        expected_custom_result = "[c]I am a person@"
         pretty_custom = Printy._repr_value(custom_str)
 
         self.assertEqual(expected_builtin_result, pretty_builtin)
@@ -344,8 +347,8 @@ class TestInlineFlagsPrinty(unittest.TestCase):
         Test pretty printing an str method of an object inside a dictionary
         or any iterable, it should give it a light magenta color
         """
-        dict_to_print = {'class': int}
-        expected_result = '{\n    [n>]\'class\'@: <class \'int\'>[<oB],@\n}'
+        dict_to_print = {"class": int}
+        expected_result = "{\n    [n>]'class'@: <class 'int'>[<oB],@\n}"
         pretty_dict = Printy._repr_value(dict_to_print)
 
         self.assertEqual(expected_result, pretty_dict)
@@ -353,10 +356,12 @@ class TestInlineFlagsPrinty(unittest.TestCase):
     def test_pretty_custom_str_method_in_dictionary(self):
         class CustomStrMethod:
             def __str__(self):
-                return '[rBU]Red Bold Underlined@ and [y]Yellow@'
+                return "[rBU]Red Bold Underlined@ and [y]Yellow@"
 
-        dict_to_print = {'str': CustomStrMethod()}
-        expected_result = '{\n    [n>]\'str\'@: [rBU]Red Bold Underlined@ and [y]Yellow@[<oB],@\n}'
+        dict_to_print = {"str": CustomStrMethod()}
+        expected_result = (
+            "{\n    [n>]'str'@: [rBU]Red Bold Underlined@ and [y]Yellow@[<oB],@\n}"
+        )
         pretty_dict = Printy._repr_value(dict_to_print)
 
         self.assertEqual(expected_result, pretty_dict)
@@ -364,8 +369,8 @@ class TestInlineFlagsPrinty(unittest.TestCase):
     def test_print_number(self):
         integer_to_print = 123
         float_to_print = 123.45
-        expected_result_integer = '[c]123@'
-        expected_result_float = '[c]123.45@'
+        expected_result_integer = "[c]123@"
+        expected_result_float = "[c]123.45@"
 
         result_integer = Printy._repr_value(integer_to_print)
         result_float = Printy._repr_value(float_to_print)
@@ -374,8 +379,8 @@ class TestInlineFlagsPrinty(unittest.TestCase):
         self.assertEqual(expected_result_float, result_float)
 
     def test_print_boolean(self):
-        expected_false = '[<o]False@'
-        expected_true = '[<o]True@'
+        expected_false = "[<o]False@"
+        expected_true = "[<o]True@"
 
         result_false = Printy._repr_value(False)
         result_true = Printy._repr_value(True)
@@ -384,7 +389,7 @@ class TestInlineFlagsPrinty(unittest.TestCase):
         self.assertEqual(expected_true, result_true)
 
     def test_print_none(self):
-        expected_none = '[<o]None@'
+        expected_none = "[<o]None@"
         result_none = Printy._repr_value(None)
 
         self.assertEqual(expected_none, result_none)
@@ -393,18 +398,18 @@ class TestInlineFlagsPrinty(unittest.TestCase):
         """
         Test escaping values on inline formats
         """
-        email = 'escaped@gmail.com'        
-        expected_text = '\x1b[38;5;28mescaped@gmail.com\x1b[0m'
-        result = self.raw_text(f'[n]{self.esc(email)}@')
+        email = "escaped@gmail.com"
+        expected_text = "\x1b[38;5;28mescaped@gmail.com\x1b[0m"
+        result = self.raw_text(f"[n]{self.esc(email)}@")
 
         self.assertEqual(result, expected_text)
 
     def test_background_color_with_inline_flags(self):
         """
         Test backgroun color with inline flags
-        """        
-        text = '[yB{o}]Hello@'
-        expected_text = '\x1b[48;5;208;38;5;11;1mHello\x1b[0m'
+        """
+        text = "[yB{o}]Hello@"
+        expected_text = "\x1b[48;5;208;38;5;11;1mHello\x1b[0m"
 
         self.assertEqual(self.raw_text(text), expected_text)
 
@@ -412,6 +417,6 @@ class TestInlineFlagsPrinty(unittest.TestCase):
         """
         Test backgroun color with no flag for it, with global flags
         """
-        text = '[yB{}]Hello@'
-        expected_text = '\x1b[38;5;11;1mHello\x1b[0m'
+        text = "[yB{}]Hello@"
+        expected_text = "\x1b[38;5;11;1mHello\x1b[0m"
         self.assertEqual(self.raw_text(text), expected_text)

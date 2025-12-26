@@ -11,12 +11,15 @@ from .flags import Flags
 
 __version__ = "3.0.0"
 
-__all__ = ['raw_format', 'printy', 'escape', 'COLORS', 'FORMATS']
+__all__ = ["raw", "raw_format", "printy", "escape", "COLORS", "FORMATS"]
 
 printy_instance = Printy()
 
 # If user just want to get the formatted text with the ANSI escape sequences
-raw_format = printy_instance.get_formatted_text
+raw = printy_instance.get_formatted_text
+
+# Backward compatibility alias - will be deprecated in future versions
+raw_format = raw
 
 # Main function to extend print() functionality
 printy = printy_instance.format
