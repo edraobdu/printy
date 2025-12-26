@@ -129,15 +129,8 @@ Or, you can use it with python's formatting strings as well:
 [n]    >>>@ printy([n>]f'A day has \[y\]@[<o]{@minutes * [c>]24@[<o]}@[n>]\@ minutes'@)
     A day has [y]1400@ minutes
 
-[B]What about @[p>B]input@()?
-
-printy comes with a wrapper for the python built-in [p>]input@() function
-
-[n]    >>>@ [<o]from@ printy [<o]import@ inputy
-
-Try adding adding some formats the same way you did with printy and 
 [y]Check this link for a full documentation!@
 
-https://github.com/edraobdu/printy    
+https://github.com/edraobdu/printy
 """
 

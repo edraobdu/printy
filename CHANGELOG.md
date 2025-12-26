@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2024-12-26
+
+### Breaking Changes
+
+- Removed `inputy` feature entirely - use standard `input()` with printy formatting if needed
+- Minimum Python version is now 3.10 (dropped support for Python 3.5-3.9)
+
+### Changed
+
+- Migrated from setup.py to pyproject.toml for modern Python packaging
+- Replaced Travis CI with GitHub Actions for CI/CD
+- Added uv-based Makefile for development workflow
+- Updated project infrastructure to modern standards
+- Added project logo
+
+### Removed
+
+- Removed `inputy()` function
+- Removed `InvalidInputType` exception
+- Removed All Contributors configuration
+- Removed Travis CI configuration
+
 ## [2.2.0] - 2021-02-28
 
 ### Added
