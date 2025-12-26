@@ -1,4 +1,3 @@
-
 helpme = """
 #########################################################
 #########################################################
@@ -82,41 +81,41 @@ Now apply one or more of the available flags to the text like this:
 [n]    >>>@ printy([n>]'Some text to be formatted'@[<o],@ [n>]'bHI'@)
     [bHI]Some text to be formatted@
 
-Or as Inline format, use the \[\] to specify the flags, and the \@ to finish
+Or as Inline format, use the \\[\\] to specify the flags, and the \\@ to finish
 the format for a specific section:
 
-[n]    >>>@ printy([n>]'\[r\]Red\@ Default Color \[yH\]Yellow Highlighted\@ Default Color'@)
+[n]    >>>@ printy([n>]'\\[r\\]Red\\@ Default Color \\[yH\\]Yellow Highlighted\\@ Default Color'@)
     [r]Red@ Default Color [yH]Yellow Highlighted@ Default Color
 
 You can always override the whole format with a global flag:
 
-[n]    >>>@ printy([n>]'\[r\]Red\@ Default Color \[yH\]Yellow Highlighted\@ Default Color'@[<o],@ [n>]'b'@)
+[n]    >>>@ printy([n>]'\\[r\\]Red\\@ Default Color \\[yH\\]Yellow Highlighted\\@ Default Color'@[<o],@ [n>]'b'@)
     [b]Red Default Color Yellow Highlighted Default Color@
 
 Or you can change only the predefined color:
 
-[n]    >>>@ printy([n>]'\[r\]Red\@ Default Color \[yH\]Yellow Highlighted\@ Default Color'@[<o],@ [r]predefined@=[n>]'b'@)
+[n]    >>>@ printy([n>]'\\[r\\]Red\\@ Default Color \\[yH\\]Yellow Highlighted\\@ Default Color'@[<o],@ [r]predefined@=[n>]'b'@)
     [r]Red@ [b]Default Color@ [yH]Yellow Highlighted@ [b]Default Color@
 
-[n]    >>>@ printy([n>]'\[r\]Red\@ Default Color \[yH\]Yellow Highlighted\@ Default Color'@[<o],@ [r]predefined@=[n>]'nBIU'@)
+[n]    >>>@ printy([n>]'\\[r\\]Red\\@ Default Color \\[yH\\]Yellow Highlighted\\@ Default Color'@[<o],@ [r]predefined@=[n>]'nBIU'@)
     [r]Red@ [nBIU]Default Color@ [yH]Yellow Highlighted@ [nBIU]Default Color@
 
-If you need to use one of the special characters ('\[', '\]', '\@'), simply escape them
+If you need to use one of the special characters ('\\[', '\\]', '\\@'), simply escape them
 
-[n]    >>>@ printy([n>]'\[B\]\\\[myemail\\\@mydomain.com\\\]\@'@)
-    [B]\[myemail\@mydomain.com\]@
+[n]    >>>@ printy([n>]'\\[B\\]\\\\[myemail\\\\@mydomain.com\\\\]\\@'@)
+    [B]\\[myemail\\@mydomain.com\\]@
 
 Now you can do stuffs like:
 
 [n]    >>>@ text = [n>]'Hello world, python is awesome!!!'@
-[n]    >>>@ printy(text.replace([n>]'python'@[<o],@ [n>]'\[r\]python\@'@))
+[n]    >>>@ printy(text.replace([n>]'python'@[<o],@ [n>]'\\[r\\]python\\@'@))
     Hello world, [r]python@ is awesome
 
 Or some html highlighting:
 
 [n]    >>>@ html = (
-[n]    ...@ [n>]'<div \[p\]class=\@\[n>\]"active"\@ \[p\]id=\@\[n>\]"my-div"\@>'@
-[n]    ...@ [n>]'    <span \[p\]data-some-data=\@\[n>\]"extra-data"\@>\[p\]Some text\@</span>'@
+[n]    ...@ [n>]'<div \\[p\\]class=\\@\\[n>\\]"active"\\@ \\[p\\]id=\\@\\[n>\\]"my-div"\\@>'@
+[n]    ...@ [n>]'    <span \\[p\\]data-some-data=\\@\\[n>\\]"extra-data"\\@>\\[p\\]Some text\\@</span>'@
 [n]    ...@ [n>]'</div>'@)
 [n]    >>>@ printy(html[<o],@ [r]default@=[n>]'y>'@)
     [y>]<div@ class=[n>]'active'@ id=[n>]'my-div'@[y>]>@
@@ -126,18 +125,10 @@ Or some html highlighting:
 Or, you can use it with python's formatting strings as well:
 
 [n]    >>>@ minutes = [c>]60@
-[n]    >>>@ printy([n>]f'A day has \[y\]@[<o]{@minutes * [c>]24@[<o]}@[n>]\@ minutes'@)
+[n]    >>>@ printy([n>]f'A day has \\[y\\]@[<o]{@minutes * [c>]24@[<o]}@[n>]\\@ minutes'@)
     A day has [y]1400@ minutes
 
-[B]What about @[p>B]input@()?
-
-printy comes with a wrapper for the python built-in [p>]input@() function
-
-[n]    >>>@ [<o]from@ printy [<o]import@ inputy
-
-Try adding adding some formats the same way you did with printy and 
 [y]Check this link for a full documentation!@
 
-https://github.com/edraobdu/printy    
+https://github.com/edraobdu/printy
 """
-

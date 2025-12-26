@@ -1,26 +1,26 @@
 # Printy
 
-![Travis (.org)](https://img.shields.io/travis/edraobdu/printy?logo=travis&style=flat-square) 
+<p align="center">
+  <img src="assets/printy-logo-transparent.png" alt="Printy Logo" width="200">
+</p>
+
+<p align="center">
+  <em>Sometimes you just want to print stuff with colors</em>
+</p>
+
 ![Codecov](https://img.shields.io/codecov/c/gh/edraobdu/printy?logo=codecov&style=flat-square)
 ![PyPI](https://img.shields.io/pypi/v/printy?style=flat-square)
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/printy?style=flat-square)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/printy?logo=python&logoColor=blue&style=flat-square)
-[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
 ![PyPI - License](https://img.shields.io/pypi/l/printy?style=flat-square)
 
-Printy is a **light** and **cross-platform** library that extends the functionalities of the 
-built-in functions ```print()``` and ```input()```. Printy stands out for its
-simplicity and for being and easy to use library, it lets you colorize and apply some standard formats 
+Printy is a **light** and **cross-platform** library that extends the functionalities of the
+built-in function ```print()```. Printy stands out for its
+simplicity and for being an easy to use library, it lets you colorize and apply some standard formats
 to your text with an intuitive and friendly API based on **flags**.
 
 ![Printy demo](.github/demo_printy.gif)
 
-![Inputy Demo](.github/demo_inputy.gif)
-
-_<sub>NOTE: Printy manages the most common and simple tasks when it comes to print 
-text and to validate some input. If you want to have more control over the 
-console output check out **[Rich](https://github.com/willmcgugan/rich)** by @willmcgugan, 
-an amazing library that let's you do much more cool things!!</sub>_
 
 ## Table of Contents
 
@@ -30,18 +30,13 @@ an amazing library that let's you do much more cool things!!</sub>_
     2. [Using inline flags](#using-inline-flags)
     3. [Untrusted sources](#untrusted-sources)
     4. [Background Colors](#background-colors)
-3. [What about input()?](#what-about-input)
-4. [Curious?](#curious)
-5. [API](#api)
+3. [Curious?](#curious)
+4. [API](#api)
     1. [printy()](#printy)
-    2. [inputy()](#inputy)
-    3. [List 1: flags](#list-1-flags)
-    4. [List 2: types](#list-2-types)
-    5. [List 2: conditions](#list-3-conditions)
-6. [Changelog](#changelog)
-7. [Dependencies](#dependencies)
-8. [Contributing](#contributing)
-9. [Contributors](#contributors-)
+    2. [List 1: flags](#list-1-flags)
+5. [Changelog](#changelog)
+6. [Dependencies](#dependencies)
+7. [Contributing](#contributing)
 
 ## Installation
 
@@ -184,69 +179,71 @@ printy('Normal Text [nB{r}]Green bold text over a red background@ Also normal')
 
 ![Printy background](.github/background_printy.png)
 
-## What about input()?
+## Integration with Other Libraries
 
-Printy also includes an alternative function for the builtin input(), that, not only
-lets us applies formats to the prompted message (if passed), but also, we can force
-the user to enter a certain type of data.
-```python
-from printy import inputy
-```
-Let's say we want to get an integer from the user's input, for that, we can set
-type='int' in the 'inputy' function (we can specify formats the same way we'd do
- with printy)
-```python
-fruits = ["Apple", "Orange", "Pineapple"]
-fruit = inputy("Select a fruit: ", options=fruits, condition="i")
+Sometimes you need to get the formatted text with ANSI escape sequences without printing it directly. This is useful when integrating printy with other libraries or when you need to pass formatted strings to other functions. For this, printy provides the `raw()` function (also available as `raw_format()` for backward compatibility).
 
-qty = inputy("How many [yBU]%ss@ do you want?" % fruit, predefined="rB", type="int", condition="+")
+### Getting Formatted Text
 
-confirmation = inputy("Are you sure you want [r]%d@ %ss?" % (qty, fruit), type="bool", options=["y", "n"], condition="i")
-```
-
-In all of the above examples, if the user enters a value with a type other than 
-the one specified in 'type' (default is 'str'), the message will show again and will prompt also a warning 
-(and so on until the user enters a valid value according to the type)
-
-You can pass certain conditions to validate the input, for example, you can 
-pass ```condition="+"``` on an input with type 'int' to force the user to enter
-a positive integer (valid also for 'float'), check the complete options below
-
-**The best part** is that the returned value's type is also the one of the specified 
-type, therefore, from the above examples, both *fruit* will be str, *qty* will be integer, and
-*confirmation* will be a boolean, so, you're gonna get the information right as you need it.
-
-![Printy inputy Demo](.github/inputy_example.png)
-
-### New in v2.1.0
-You can also add some restriction for numbers: max_digits and max_decimals 
-
-![Printy inputy max digits and max decimals](.github/inputy_max_digits_max_decimals.png)
-
-
-## Curious?
-
-If you want to know what's behind the scenes, you can get the text with all the ANSI escaped sequences,
-for that, use the ```raw_format()``` function.
+The `raw()` function returns the text with all ANSI escape codes applied:
 
 ```python
-from printy import raw_format
-raw_text = raw_format("Some [rB]formatted@ [yIU]text@")
-print(repr(raw_text))  
-print(raw_text)
+from printy import raw
+
+# Get formatted text as a string
+formatted = raw("Some [rB]formatted@ [yIU]text@")
+print(repr(formatted))  # Shows the ANSI escape codes
+print(formatted)        # Displays the formatted text
 ```
 
 ![Printy raw format](.github/printy_raw_format.png)
 
-For convenience, we have stored all colors and formats flags in list, in case you need them:
+### Integration Example: Using with Tabulate
+
+Here's an example of how you can use `raw()` to integrate printy with other libraries. In this case, we'll use `tabulate` to create tables with colorful, formatted headers:
+
+```python
+from printy import raw
+
+# This example shows how to integrate printy with other tools
+# You can use this same pattern with any library that accepts strings
+# If you want to try this specific example: pip install tabulate
+try:
+    from tabulate import tabulate
+
+    data = [
+        ["Alice", 25, "Engineering"],
+        ["Bob", 30, "Marketing"],
+        ["Charlie", 35, "Sales"]
+    ]
+
+    # Use raw() to create formatted strings for headers
+    headers = [
+        raw("[cB]Name@"),           # Cyan bold
+        raw("[yB]Age@"),            # Yellow bold
+        raw("[nB]Department@")      # Green bold
+    ]
+
+    print(tabulate(data, headers=headers, tablefmt="grid"))
+except ImportError:
+    print("Install tabulate to try this example: pip install tabulate")
+```
+
+This creates a table with colorful, bold headers. You can use the same pattern to integrate printy's formatting with any other library that accepts string inputs.
+
+### Available Colors and Formats
+
+For convenience, all color and format flags are available as constants:
 
 ```python
 from printy import COLORS, FORMATS
-print(COLORS)
-print(FORMATS)
+print(COLORS)    # List of all available color flags
+print(FORMATS)   # List of all available format flags
 ```
 
 ![Printy COLORS FORMATS](.github/printy_COLORS_FORMATS.png)
+
+**Note:** `raw_format()` is still available as an alias for `raw()` to maintain backward compatibility with existing code.
 
 ## API
 
@@ -261,19 +258,6 @@ print(FORMATS)
 | end | str | optional | A value to be appended to the value, default is '\n' |
 | pretty | bool | optional | True if we want to pretty print objects, False if we do not (default True) |
 | indentation | int | optional | Indentation when pretty printing dictionaries or any iterable (default 4) |
-
-### inputy()
-<sub>plus printy() parameters</sub>
-
-| Parameters | type |  | Description |
-| --- | --- | --- | --- |
-| type | str | optional | Type of value we want the user to enter (check [List 2](#list-2-types) for more info)|
-| options | list | optional | Valid only for types 'str' and 'bool', a list of options to scope the value |
-| render_options | bool | optional | Specify whether we want to display the options to the user or not | 
-| default | str | optional | If no value is entered, this one will be taken, make sure that it belongs to the options list (if passed) | 
-| condition | str | optional | A character that applies certain restrictions to the value (check [List 3](#list-3-conditions) for mor info |
-| max_digits | int | optional | Adds a restriction for numbers about the maximum number of digits that it should have |
-| max_decimals | int | optional | Adds a restriction for numbers about the maximum number of decimals that it should have |
 
 ### List 1 'flags'
 
@@ -314,53 +298,16 @@ print(FORMATS)
 - S - Crosses out the text, aka Strike
 - D - Dim effect
 
-### List 2 'types'
-- 'int': Value must be an integer or a string that can be turn into an integer, returns the value as an integer
-- 'float': Value must be a float or a string that can be turn into a float, returns the value as a float
-- 'bool': A string matching 'True' or 'False' if no options are passed, otherwise, a string that matches one of the options, returns the value as a boolean
-- 'str': The default type, if 'options' is passed, then the string must match one of the options or its item number.
-
-### List 3 'conditions'
-- '+': Valid for 'int' and 'float' types only. The value must be a **positive** number
-- '-': Valid for 'int' and 'float' types only. The value must be a **negative** number
-- 'i': valid for 'str' and 'bool' types only. The value is case insensitive, by default it is case sensitive
-
-
 ## Changelog
 
 [Changelog.md](CHANGELOG.md)
 
 ## Dependencies
 
-Printy currently supports Python 3.5 and up. Printy is a cross-platform library
+Printy currently supports Python 3.10 and up. Printy is a cross-platform library.
 
 ## Contributing
 
 Please feel free to contact me if you want to be part of the project and contribute.
-Fork or clone, push to your fork, make a pull request, let's make this a better app 
-every day!!
-
-## Contributors ✨
-
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tr>
-    <td align="center"><a href="https://github.com/edraobdu"><img src="https://avatars3.githubusercontent.com/u/31775663?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Edgardo Obregón</b></sub></a><br /><a href="https://github.com/edraobdu/printy/commits?author=edraobdu" title="Code">💻</a> <a href="https://github.com/edraobdu/printy/commits?author=edraobdu" title="Tests">⚠️</a> <a href="#example-edraobdu" title="Examples">💡</a> <a href="#ideas-edraobdu" title="Ideas, Planning, & Feedback">🤔</a> <a href="#maintenance-edraobdu" title="Maintenance">🚧</a> <a href="https://github.com/edraobdu/printy/commits?author=edraobdu" title="Documentation">📖</a> <a href="https://github.com/edraobdu/printy/issues?q=author%3Aedraobdu" title="Bug reports">🐛</a></td>
-    <td align="center"><a href="https://github.com/farahduk"><img src="https://avatars3.githubusercontent.com/u/15660335?v=4?s=100" width="100px;" alt=""/><br /><sub><b>farahduk</b></sub></a><br /><a href="#ideas-farahduk" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/edraobdu/printy/commits?author=farahduk" title="Code">💻</a> <a href="#maintenance-farahduk" title="Maintenance">🚧</a></td>
-    <td align="center"><a href="https://github.com/mihirs16"><img src="https://avatars3.githubusercontent.com/u/44063783?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mihir Singh</b></sub></a><br /><a href="https://github.com/edraobdu/printy/commits?author=mihirs16" title="Tests">⚠️</a> <a href="https://github.com/edraobdu/printy/commits?author=mihirs16" title="Code">💻</a></td>
-    <td align="center"><a href="https://soundcloud.com/lalalaaalala"><img src="https://avatars1.githubusercontent.com/u/7810348?v=4?s=100" width="100px;" alt=""/><br /><sub><b>musicprogram</b></sub></a><br /><a href="#userTesting-musicprogram" title="User Testing">📓</a></td>
-    <td align="center"><a href="https://github.com/Tams-Tams"><img src="https://avatars.githubusercontent.com/u/63205558?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Tanmay</b></sub></a><br /><a href="#ideas-Tams-Tams" title="Ideas, Planning, & Feedback">🤔</a></td>
-    <td align="center"><a href="https://github.com/obentham"><img src="https://avatars.githubusercontent.com/u/22358748?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Oliver Bentham</b></sub></a><br /><a href="#userTesting-obentham" title="User Testing">📓</a></td>
-  </tr>
-</table>
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+Fork or clone, push to your fork, make a pull request, let's make this a better app
+every day!
