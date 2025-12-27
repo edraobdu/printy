@@ -80,6 +80,14 @@ jobs:
             --notes "Release v${{ steps.get_version.outputs.version }}" \
             --latest
 
+      - name: Trigger PyPI publish workflow
+        if: steps.check_release.outputs.is_release == 'true' && steps.check_tag.outputs.tag_exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Triggering publish workflow for tag v${{ steps.get_version.outputs.version }}"
+          gh workflow run publish.yml --ref "v${{ steps.get_version.outputs.version }}"
+
       - name: Delete release branch
         if: steps.check_release.outputs.is_release == 'true'
         continue-on-error: true
