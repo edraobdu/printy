@@ -1,0 +1,54 @@
+name: Finalize Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'pyproject.toml'
+
+jobs:
+  finalize:
+    # Only run if this is a version bump commit
+    if: contains(github.event.head_commit.message, 'Bump version to')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version from pyproject.toml
+        id: get_version
+        run: |
+          VERSION=$(grep '^version = ' pyproject.toml | cut -d'"' -f2)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create annotated tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${{ steps.get_version.outputs.version }}" \
+            -m "Release version ${{ steps.get_version.outputs.version }}"
+
+      - name: Push tag
+        run: |
+          git push origin refs/tags/v${{ steps.get_version.outputs.version }}
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.get_version.outputs.version }}" \
+            --title "Release v${{ steps.get_version.outputs.version }}" \
+            --notes "Release v${{ steps.get_version.outputs.version }}" \
+            --latest
+
+      - name: Delete release branch
+        continue-on-error: true
+        run: |
+          BRANCH_NAME="release/v${{ steps.get_version.outputs.version }}"
+          git push origin --delete "$BRANCH_NAME"
