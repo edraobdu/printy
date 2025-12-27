@@ -1,4 +1,4 @@
-name: Create Release
+name: Create Release PR
 
 on:
   workflow_dispatch:
@@ -28,6 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Needed to push commits and tags
+      pull-requests: write  # Needed to create pull requests
 
     steps:
       - name: Checkout code
@@ -64,25 +65,45 @@ jobs:
           git add pyproject.toml
           git commit -m "Bump version to ${{ steps.bump_version.outputs.new_version }}"
 
-      - name: Create annotated tag
+      - name: Create release branch
+        id: create_branch
         run: |
-          git tag -a "v${{ steps.bump_version.outputs.new_version }}" \
-            -m "Release version ${{ steps.bump_version.outputs.new_version }}"
+          BRANCH_NAME="release/v${{ steps.bump_version.outputs.new_version }}"
+          git checkout -b "$BRANCH_NAME"
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
-      - name: Push changes and tag
+      - name: Push release branch
         run: |
-          git push origin main
-          git push origin refs/tags/v${{ steps.bump_version.outputs.new_version }}
+          git push origin ${{ steps.create_branch.outputs.branch_name }}
 
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
+      - name: Create Pull Request
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Auto-provided by GitHub
-        with:
-          tag_name: v${{ steps.bump_version.outputs.new_version }}
-          release_name: Release v${{ steps.bump_version.outputs.new_version }}
-          body: |
-            Version bumped from ${{ steps.current_version.outputs.version }}
-            to ${{ steps.bump_version.outputs.new_version }}
-          draft: false
-          prerelease: false
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr create \
+            --base main \
+            --head ${{ steps.create_branch.outputs.branch_name }} \
+            --title "Release v${{ steps.bump_version.outputs.new_version }}" \
+            --body "## Release v${{ steps.bump_version.outputs.new_version }}
+
+          This PR bumps the version from ${{ steps.current_version.outputs.version }} to ${{ steps.bump_version.outputs.new_version }}.
+
+          ### Pre-merge Checklist
+          - [ ] All tests pass
+          - [ ] All lint checks pass
+          - [ ] Version bump is correct
+
+          ### Post-merge Actions
+          Once merged, the following will happen automatically:
+          1. Git tag \`v${{ steps.bump_version.outputs.new_version }}\` will be created
+          2. GitHub release will be published
+          3. PyPI publish workflow will trigger
+
+          ---
+          🤖 This PR was created automatically by the release workflow" \
+            --label "release"
+
+      - name: Output PR info
+        run: |
+          echo "✅ Release PR created successfully!"
+          echo "Review and merge the PR to finalize the release."
