@@ -17,7 +17,7 @@ from .flags import Flags
 
 try:
     __version__ = version("printy")
-except Exception:
+except Exception:  # pragma: no cover
     __version__ = "unknown"  # Fallback for development
 
 __all__ = ["raw", "raw_format", "printy", "escape", "COLORS", "FORMATS"]
