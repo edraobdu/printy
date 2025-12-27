@@ -1,0 +1,88 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: 'patch'
+
+jobs:
+  # Call existing test workflow
+  test:
+    uses: ./.github/workflows/tests.yml
+
+  # Call existing lint workflow
+  lint:
+    uses: ./.github/workflows/lint.yml
+
+  # Only run release if tests and lint pass
+  release:
+    needs: [test, lint]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Needed to push commits and tags
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Set up Python
+        run: uv python install 3.14
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Get current version
+        id: current_version
+        run: |
+          VERSION=$(grep '^version = ' pyproject.toml | cut -d'"' -f2)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Bump version
+        id: bump_version
+        run: |
+          uv version --bump ${{ inputs.version_bump }}
+          NEW_VERSION=$(grep '^version = ' pyproject.toml | cut -d'"' -f2)
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pyproject.toml
+          git commit -m "Bump version to ${{ steps.bump_version.outputs.new_version }}"
+
+      - name: Create annotated tag
+        run: |
+          git tag -a "v${{ steps.bump_version.outputs.new_version }}" \
+            -m "Release version ${{ steps.bump_version.outputs.new_version }}"
+
+      - name: Push changes and tag
+        run: |
+          git push origin main
+          git push origin refs/tags/v${{ steps.bump_version.outputs.new_version }}
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Auto-provided by GitHub
+        with:
+          tag_name: v${{ steps.bump_version.outputs.new_version }}
+          release_name: Release v${{ steps.bump_version.outputs.new_version }}
+          body: |
+            Version bumped from ${{ steps.current_version.outputs.version }}
+            to ${{ steps.bump_version.outputs.new_version }}
+          draft: false
+          prerelease: false

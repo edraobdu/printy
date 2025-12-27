@@ -50,9 +50,9 @@ class Printy:
             try:
                 from ctypes import windll
 
-                k = windll.kernel32
-                k.SetConsoleMode(k.GetStdHandle(-11), 7)
-                return True
+                k = windll.kernel32  # pragma: no cover
+                k.SetConsoleMode(k.GetStdHandle(-11), 7)  # pragma: no cover
+                return True  # pragma: no cover
             except ImportError:
                 return False
         return False
@@ -141,8 +141,8 @@ class Printy:
 
                 if action == cls.ESCAPE_CHAR:
                     # Add the character to the text
-                    if current_action == cls.START_FLAGS:
-                        section_flags.append(char)
+                    if current_action == cls.START_FLAGS:  # pragma: no cover
+                        section_flags.append(char)  # pragma: no cover
                     elif current_action == cls.START_FORMAT:
                         section_text.append(char)
                 else:

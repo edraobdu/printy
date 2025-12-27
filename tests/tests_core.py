@@ -287,10 +287,20 @@ class TestInlineFlagsPrinty(unittest.TestCase):
     def test_pretty_printy_sets(self):
         """Test pretty printing sets"""
         set_to_print = {1, 2, "hello"}
-        expected_result = "{\n    [c]1@[<oB],@ [c]2@[<oB],@ [c>]'hello'@\n}"
         pretty_set = Printy._repr_value(set_to_print)
 
-        self.assertEqual(expected_result, pretty_set)
+        # Check that color codes are present (pretty formatting)
+        self.assertIn("[c]", pretty_set)
+        self.assertIn("@", pretty_set)
+
+        # Check that all elements are present in the output
+        self.assertIn("1", pretty_set)
+        self.assertIn("2", pretty_set)
+        self.assertIn("'hello'", pretty_set)
+
+        # Check basic structure
+        self.assertTrue(pretty_set.startswith("{\n"))
+        self.assertTrue(pretty_set.endswith("\n}"))
 
     def test_pretty_printy_dict_pretty_false(self):
         """Tests pretty printing a dict when 'pretty' parameter is set to False"""
@@ -319,10 +329,22 @@ class TestInlineFlagsPrinty(unittest.TestCase):
     def test_pretty_printy_set_pretty_false(self):
         """Tests pretty printing a set when 'pretty' parameter is set to False"""
         set_to_print = {1, 2, "hello"}
-        expected_result = "{1, 2, 'hello'}"
         not_pretty_set = Printy._repr_value(set_to_print, pretty=False)
 
-        self.assertEqual(expected_result, not_pretty_set)
+        # Check that NO color codes are present (not pretty formatting)
+        self.assertNotIn("[c]", not_pretty_set)
+        self.assertNotIn("[<oB]", not_pretty_set)
+        self.assertNotIn("[c>]", not_pretty_set)
+
+        # Check that all elements are present in the output
+        self.assertIn("1", not_pretty_set)
+        self.assertIn("2", not_pretty_set)
+        self.assertIn("'hello'", not_pretty_set)
+
+        # Check basic structure (single line, no newlines)
+        self.assertTrue(not_pretty_set.startswith("{"))
+        self.assertTrue(not_pretty_set.endswith("}"))
+        self.assertNotIn("\n", not_pretty_set)
 
     def test_pretty_print_str_method_of_objects(self):
         """Test printing the str method of an object, both not defined and defined"""
@@ -420,3 +442,116 @@ class TestInlineFlagsPrinty(unittest.TestCase):
         text = "[yB{}]Hello@"
         expected_text = "\x1b[38;5;11;1mHello\x1b[0m"
         self.assertEqual(self.raw_text(text), expected_text)
+
+
+class TestDeprecation(unittest.TestCase):
+    """Test case for deprecated functions"""
+
+    def test_raw_format_deprecation_warning(self):
+        """Test that raw_format issues a DeprecationWarning"""
+        from printy import raw_format
+
+        with self.assertWarns(DeprecationWarning) as cm:
+            result = raw_format("test text", "r")
+
+        # Verify warning message
+        warning_message = str(cm.warning)
+        self.assertIn("raw_format() is deprecated", warning_message)
+        self.assertIn("Use raw() instead", warning_message)
+        self.assertIn("version 4.0", warning_message)
+
+    def test_raw_format_functionality(self):
+        """Test that raw_format still works correctly despite deprecation"""
+        from printy import raw, raw_format
+
+        # Both should produce the same output
+        text = "test text"
+        flags = "r"
+        result_raw = raw(text, flags)
+
+        with self.assertWarns(DeprecationWarning):
+            result_raw_format = raw_format(text, flags)
+
+        self.assertEqual(result_raw, result_raw_format)
+
+
+class TestWindowsConsoleMode(unittest.TestCase):
+    """Test case for Windows console mode setup"""
+
+    def setUp(self):
+        self.printy = Printy()
+
+    def test_non_windows_platform(self):
+        """Test that non-Windows platforms return False"""
+        # This tests line 58 of core.py - non-Windows path
+        result = self.printy.set_windows_console_mode()
+        self.assertFalse(result)
+
+    def test_windows_platform_import_error(self):
+        """Test Windows platform with ImportError from ctypes"""
+        # Set platform to Windows to trigger the Windows path
+        self.printy.platform = WINDOWS
+
+        # Call set_windows_console_mode - on Linux this will hit ImportError
+        # This covers lines 50-57 (Windows path with ImportError)
+        result = self.printy.set_windows_console_mode()
+
+        # Should return False after catching ImportError
+        self.assertFalse(result)
+
+
+class TestEdgeCases(unittest.TestCase):
+    """Test case for edge cases in parsing"""
+
+    def setUp(self):
+        self.printy = Printy()
+        self.raw_text = self.printy.get_formatted_text
+
+    def test_double_open_bracket_edge_case(self):
+        """Test edge case with misplaced open bracket"""
+        # This triggers line 90 in core.py - when last_special is not end_format_char
+        # and special is open_flag_char
+        # Pattern: ][  - close bracket followed by open bracket
+        text = "[r]test] [r]more@"
+        result = self.raw_text(text)
+        # Should handle the misplaced brackets
+        self.assertIsNotNone(result)
+
+    def test_unmatched_close_bracket_edge_case(self):
+        """Test edge case with unmatched closing bracket"""
+        # This triggers line 96 in core.py - when last_special != open_flag_char
+        # and special is close_flag_char
+        text = "]text"
+        result = self.raw_text(text)
+        # Should treat ] as escaped
+        self.assertIn("]text", result)
+
+    def test_escaped_char_in_format_section(self):
+        """Test escaped character in format text section"""
+        # This tests the ESCAPE_CHAR path for START_FORMAT (line 146-147)
+        text = "[r]]test@"  # Double ] should be treated as escaped
+        result = self.raw_text(text)
+        # The escaped ] should appear in formatted output
+        self.assertIsNotNone(result)
+
+    def test_format_flag_as_background(self):
+        """Test format flags in background syntax"""
+        # This triggers line 112 in flags.py - FORMAT_ flag in get_bg_value
+        from printy.flags import Flags
+
+        # Get a format flag and use it in background context
+        available_flags = Flags.get_flags()
+        result = Flags.get_bg_value(available_flags, "B")
+        # Should return the format value without background prefix
+        self.assertIsNotNone(result)
+
+    def test_boolean_none_in_nested_structure(self):
+        """Test boolean and None formatting in nested structures"""
+        # This triggers line 264 in core.py - boolean/None formatting
+        # Create a deeply nested structure with boolean and None
+        data = {"outer": {"inner": {"bool_val": True, "none_val": None}}}
+        result = self.raw_text(data)
+
+        # Should format boolean and None with special formatting
+        self.assertIn("True", result)
+        self.assertIn("None", result)

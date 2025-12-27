@@ -8,7 +8,17 @@ on:
       - 'v*'
 
 jobs:
+  # Run tests before publishing
+  test:
+    uses: ./.github/workflows/tests.yml
+
+  # Run lint before publishing
+  lint:
+    uses: ./.github/workflows/lint.yml
+
+  # Only publish if tests and lint pass
   publish:
+    needs: [test, lint]
     runs-on: ubuntu-latest
     environment: pypi
     permissions:

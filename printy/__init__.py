@@ -6,10 +6,16 @@ a friendly and intuitive syntax
 
 """
 
+import warnings
+from importlib.metadata import version
+
 from .core import Printy
 from .flags import Flags
 
-__version__ = "3.0.0"
+try:
+    __version__ = version("printy")
+except Exception:
+    __version__ = "unknown"  # Fallback for development
 
 __all__ = ["raw", "raw_format", "printy", "escape", "COLORS", "FORMATS"]
 
@@ -18,8 +24,20 @@ printy_instance = Printy()
 # If user just want to get the formatted text with the ANSI escape sequences
 raw = printy_instance.get_formatted_text
 
+
 # Backward compatibility alias - will be deprecated in future versions
-raw_format = raw
+def _deprecated_raw_format(*args, **kwargs):
+    """Deprecated alias for raw(). Use raw() instead."""
+    warnings.warn(
+        "raw_format() is deprecated and will be removed in version 4.0. "
+        "Use raw() instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return raw(*args, **kwargs)
+
+
+raw_format = _deprecated_raw_format
 
 # Main function to extend print() functionality
 printy = printy_instance.format
