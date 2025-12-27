@@ -452,7 +452,7 @@ class TestDeprecation(unittest.TestCase):
         from printy import raw_format
 
         with self.assertWarns(DeprecationWarning) as cm:
-            result = raw_format("test text", "r")
+            raw_format("test text", "r")
 
         # Verify warning message
         warning_message = str(cm.warning)

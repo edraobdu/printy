@@ -6,8 +6,11 @@ a friendly and intuitive syntax
 
 """
 
+from __future__ import annotations
+
 import warnings
 from importlib.metadata import version
+from typing import Any
 
 from .core import Printy
 from .flags import Flags
@@ -26,7 +29,7 @@ raw = printy_instance.get_formatted_text
 
 
 # Backward compatibility alias - will be deprecated in future versions
-def _deprecated_raw_format(*args, **kwargs):
+def _deprecated_raw_format(*args: Any, **kwargs: Any) -> str:
     """Deprecated alias for raw(). Use raw() instead."""
     warnings.warn(
         "raw_format() is deprecated and will be removed in version 4.0. "

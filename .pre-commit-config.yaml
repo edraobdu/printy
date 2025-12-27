@@ -14,3 +14,10 @@ repos:
         language: system
         types: [python]
         pass_filenames: false
+
+      - id: mypy
+        name: mypy (type check)
+        entry: uv run mypy printy/
+        language: system
+        types: [python]
+        pass_filenames: false
