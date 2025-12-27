@@ -15,3 +15,11 @@ class TestExceptions(unittest.TestCase):
         error = InvalidFlag(self.invalid_flag)
 
         self.assertEqual(str(error), self.invalid_flag_error)
+
+    def test_invalid_background_flag(self):
+        """Test that invalid background flag raises InvalidFlag"""
+        from printy import printy
+
+        # Z is not a valid flag, this triggers line 145 in flags.py
+        with self.assertRaises(InvalidFlag):
+            printy("test", "{Z}")

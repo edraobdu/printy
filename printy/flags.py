@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import re
+from typing import cast
 
 from .exceptions import InvalidFlag
 
@@ -69,17 +72,17 @@ class Flags:
     reset = "0"
 
     @classmethod
-    def get_end_of_line(cls):
+    def get_end_of_line(cls) -> str:
         """Defined method to get the 'reset' code"""
         return cls.escape_ansi_code + cls.reset + cls.escape_ansi_end
 
     @classmethod
-    def join_flags(cls, flags):
+    def join_flags(cls, flags: list[str]) -> str:
         """Given a set of flags, returned the final ansi code to add to the text"""
         return "%s%s%s" % (cls.escape_ansi_code, ";".join(flags), cls.escape_ansi_end)
 
     @classmethod
-    def get_flags(cls):
+    def get_flags(cls) -> dict[str, str]:
         """
         returns a dictionary where the flag is the key and the attribute
         name is the value
@@ -91,38 +94,38 @@ class Flags:
         }
 
     @classmethod
-    def get_fg_value(cls, flags, flag):
+    def get_fg_value(cls, flags: dict[str, str], flag: str) -> str:
         """
         Return the flag as fg ansi code
         """
         # The name of the attribute in the class
         flag_name = flags[flag]
         if flag_name.startswith("FORMAT_"):
-            return getattr(cls, flag_name)[1]
-        return cls.start_foreground + getattr(cls, flag_name)[1]
+            return cast(tuple[str, str], getattr(cls, flag_name))[1]
+        return cls.start_foreground + cast(tuple[str, str], getattr(cls, flag_name))[1]
 
     @classmethod
-    def get_bg_value(cls, flags, flag):
+    def get_bg_value(cls, flags: dict[str, str], flag: str) -> str:
         """
         Truns a flag ansi code from doreground to background code
         """
         # The name of the attribute in the class
         flag_name = flags[flag]
         if flag_name.startswith("FORMAT_"):
-            return getattr(cls, flag_name)[1]
-        return cls.start_background + getattr(cls, flag_name)[1]
+            return cast(tuple[str, str], getattr(cls, flag_name))[1]
+        return cls.start_background + cast(tuple[str, str], getattr(cls, flag_name))[1]
 
     @classmethod
-    def get_flag_values(cls, flags):
+    def get_flag_values(cls, flags: str) -> list[str]:
         """returns a list of the escaped values for the flag labels"""
         available_flags = cls.get_flags()
-        flags_values = []
+        flags_values: list[str] = []
 
         # New in v1.3.0
         # flags can get a dark or a light intensity through the '<' and '>'
         # characters respectively. Dark colors have the form: <color, i.e. <b
         # light colors have the form color>, i.e. b>
-        potential_flag = []
+        potential_flag: list[str] = []
         flags = flags.replace(" ", "")  # remove white-spaces
         # We use inspect so we can check the following character also
 

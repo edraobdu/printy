@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import platform
+from typing import Any
 
 from .flags import Flags
 
@@ -32,11 +35,11 @@ class Printy:
     END_FORMAT = "end_format"
     ESCAPE_CHAR = "escape_char"
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.platform = platform.system()
         self.virtual_terminal_processing = self.set_windows_console_mode()
 
-    def set_windows_console_mode(self):
+    def set_windows_console_mode(self) -> bool:
         """
         For Windows os to work and get the escape sequences correctly,
         we'll need to enable the variable ENABLE_VIRTUAL_TERMINAL_PROCESSING
@@ -48,11 +51,11 @@ class Printy:
         # so we can print out the cleaned text
         if self.platform == WINDOWS:
             try:
-                from ctypes import windll
+                from ctypes import windll  # type: ignore[attr-defined]
 
-                k = windll.kernel32
-                k.SetConsoleMode(k.GetStdHandle(-11), 7)
-                return True
+                k = windll.kernel32  # pragma: no cover
+                k.SetConsoleMode(k.GetStdHandle(-11), 7)  # pragma: no cover
+                return True  # pragma: no cover
             except ImportError:
                 return False
         return False
@@ -76,7 +79,9 @@ class Printy:
         return False
 
     @classmethod
-    def _check_special_char_position(cls, last_special: str, special: str) -> str:
+    def _check_special_char_position(
+        cls, last_special: str | None, special: str
+    ) -> str:
         """
         Returns an action to execute if the character is well placed. It should
         only be applied over special characters.
@@ -103,6 +108,8 @@ class Printy:
                 return cls.ESCAPE_CHAR
             else:
                 return cls.END_FORMAT
+        # Fallback for any unexpected special character
+        return cls.ESCAPE_CHAR
 
     @classmethod
     def _replace_escaped(cls, text: str) -> str:
@@ -112,7 +119,7 @@ class Printy:
         return text
 
     @classmethod
-    def _get_inline_format_as_tuple(cls, text: str) -> list:
+    def _get_inline_format_as_tuple(cls, text: str) -> list[tuple[str, str | None]]:
         """
         In case some inline formats have been applied we need to get a list of
         tuples indicating the formats to be applied via flags and the text
@@ -121,13 +128,13 @@ class Printy:
         We'll get the list [('Some', 'rB), (' Te', None), ('xt', 'H')]
         """
         prev = ""  # Stores the last character in the loop
-        last_special_char = None
-        list_of_formats = []  # Final list to be returned
+        last_special_char: str | None = None
+        list_of_formats: list[tuple[str, str | None]] = []  # Final list to be returned
 
         # While looping the text, we'll get the formats to be applied to
         # certain section of that text
-        section_text = []
-        section_flags = []
+        section_text: list[str] = []
+        section_flags: list[str] = []
         current_action = cls.START_FORMAT
 
         # Will tell us when we're at the last character of the loop
@@ -141,8 +148,8 @@ class Printy:
 
                 if action == cls.ESCAPE_CHAR:
                     # Add the character to the text
-                    if current_action == cls.START_FLAGS:
-                        section_flags.append(char)
+                    if current_action == cls.START_FLAGS:  # pragma: no cover
+                        section_flags.append(char)  # pragma: no cover
                     elif current_action == cls.START_FORMAT:
                         section_text.append(char)
                 else:
@@ -188,7 +195,7 @@ class Printy:
         return cls._replace_escaped("".join(x[0] for x in tuple_text))
 
     @classmethod
-    def _escape_special_chars(cls, value):
+    def _escape_special_chars(cls, value: Any) -> str:
         """
         Escape all the special characters in the value (or the string
         representation of the value if an object is passed)
@@ -199,13 +206,13 @@ class Printy:
         return _str
 
     @classmethod
-    def _pretty_print_object(cls, obj, indentation: int, level: int = 1) -> str:
+    def _pretty_print_object(cls, obj: Any, indentation: int, level: int = 1) -> str:
         """
         Recursive function to pretty print objects, with some
         indentations if needed.
         """
 
-        def _nested(nested_obj, nested_level: int = level) -> str:
+        def _nested(nested_obj: Any, nested_level: int = level) -> str:
             indentation_values = " " * indentation * nested_level
             indentation_braces = " " * indentation * (nested_level - 1)
             if isinstance(nested_obj, dict):
@@ -270,7 +277,7 @@ class Printy:
         return _nested(obj)
 
     @classmethod
-    def _repr_value(cls, value, pretty: bool = True, indentation: int = 4) -> str:
+    def _repr_value(cls, value: Any, pretty: bool = True, indentation: int = 4) -> str:
         """
         In case a dictionary or a list or a set is passed as a value, we need
         to get the representation of it, and, escape all the '[', ']' and '@'
@@ -290,12 +297,12 @@ class Printy:
 
     def get_formatted_text(
         self,
-        value: str,
+        value: Any,
         flags: str = "",
         predefined: str = "",
         pretty: bool = True,
         indentation: int = 4,
-        **kwargs,
+        **kwargs: Any,
     ) -> str:
         """
         Applies the format specified by the 'flags' to the 'value'.
@@ -343,14 +350,14 @@ class Printy:
 
     def format(
         self,
-        value="",
-        flags="",
-        predefined="",
-        file="",
-        end=default_end,
-        pretty=True,
-        indentation=4,
-    ):
+        value: Any = "",
+        flags: str = "",
+        predefined: str = "",
+        file: str = "",
+        end: str = default_end,
+        pretty: bool = True,
+        indentation: int = 4,
+    ) -> None:
         """Prints out the value"""
         value = self.read_file(file) if file else value
         print(
@@ -358,7 +365,7 @@ class Printy:
             end=end,
         )
 
-    def escape(self, value):
+    def escape(self, value: str) -> str:
         """
         Escape the special characters of the value passed to printy. Useful
         for untrusted sources.
