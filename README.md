@@ -231,6 +231,8 @@ except ImportError:
 
 This creates a table with colorful, bold headers. You can use the same pattern to integrate printy's formatting with any other library that accepts string inputs.
 
+![Printy Tabulate Example](.github/printy_tabulate_example.png)
+
 ### Available Colors and Formats
 
 For convenience, all color and format flags are available as constants:

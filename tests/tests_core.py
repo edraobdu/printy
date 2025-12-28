@@ -475,6 +475,73 @@ class TestDeprecation(unittest.TestCase):
         self.assertEqual(result_raw, result_raw_format)
 
 
+class TestDeprecatedInputy(unittest.TestCase):
+    """Test case for deprecated inputy() function - can be removed in version 4.0"""
+
+    def test_inputy_deprecation_warning(self):
+        """Test that inputy issues a DeprecationWarning"""
+        from printy import inputy
+
+        # Mock input to avoid blocking on user input
+        with mock.patch("builtins.input", return_value="test input"):
+            with self.assertWarns(DeprecationWarning) as cm:
+                inputy("Enter something: ")
+
+            # Verify warning message
+            warning_message = str(cm.warning)
+            self.assertIn("inputy() was removed in version 3.0.0", warning_message)
+            self.assertIn("version 4.0", warning_message)
+            self.assertIn("input(raw", warning_message)
+
+    def test_inputy_applies_formatting(self):
+        """Test that inputy still applies printy formatting to prompts"""
+        from printy import inputy, raw
+
+        # Test that inputy with formatted text works
+        formatted_prompt = "[y]Enter name:@ "
+        expected_formatted = raw(formatted_prompt)
+
+        # Mock input and capture what prompt was passed to it
+        with mock.patch("builtins.input", return_value="user input") as mock_input:
+            with self.assertWarns(DeprecationWarning):
+                result = inputy(formatted_prompt)
+
+            # Verify input was called with the formatted prompt
+            mock_input.assert_called_once_with(expected_formatted)
+            self.assertEqual(result, "user input")
+
+    def test_inputy_ignores_extra_arguments(self):
+        """Test that inputy ignores old validation parameters"""
+        from printy import inputy
+
+        # Old inputy accepted many parameters, new wrapper should ignore them
+        with mock.patch("builtins.input", return_value="42"):
+            with self.assertWarns(DeprecationWarning):
+                result = inputy(
+                    "[y]Enter age:@ ",
+                    type="int",  # These should all be ignored
+                    options=[1, 2, 3],
+                    default="0",
+                    condition="+",
+                    max_digits=3,
+                )
+
+            # Should return the raw string from input, not converted to int
+            self.assertEqual(result, "42")
+            self.assertIsInstance(result, str)
+
+    def test_inputy_empty_prompt(self):
+        """Test that inputy works with no arguments"""
+        from printy import inputy
+
+        with mock.patch("builtins.input", return_value="test"):
+            with self.assertWarns(DeprecationWarning):
+                result = inputy()
+
+            # Should call input with empty string
+            self.assertEqual(result, "test")
+
+
 class TestWindowsConsoleMode(unittest.TestCase):
     """Test case for Windows console mode setup"""
 

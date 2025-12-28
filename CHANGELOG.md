@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Improved documentation for library integration use cases (using `raw()` with other libraries like tabulate)
 
+## [3.0.1] - YYYY-MM-DD
+
+### Added
+
+- Added deprecated `inputy()` compatibility wrapper for backward compatibility
+  - Calls standard `input()` with `raw()` formatting applied to the first argument
+  - Automatically applies printy formatting so `inputy("[y]text@")` still displays colored text
+  - Displays deprecation warning pointing users to use `input()` with `raw()` for formatting
+  - All validation parameters (type, options, default, condition, etc.) are ignored
+  - Will be removed in version 4.0
+
 ## [3.0.0] - 2024-12-26
 
 ### Breaking Changes

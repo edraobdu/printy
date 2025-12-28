@@ -20,7 +20,7 @@ try:
 except Exception:  # pragma: no cover
     __version__ = "unknown"  # Fallback for development
 
-__all__ = ["raw", "raw_format", "printy", "escape", "COLORS", "FORMATS"]
+__all__ = ["raw", "raw_format", "printy", "inputy", "escape", "COLORS", "FORMATS"]
 
 printy_instance = Printy()
 
@@ -41,6 +41,30 @@ def _deprecated_raw_format(*args: Any, **kwargs: Any) -> str:
 
 
 raw_format = _deprecated_raw_format
+
+
+# Backward compatibility wrapper for removed inputy() function
+def _deprecated_inputy(*args: Any, **kwargs: Any) -> str:
+    """
+    Deprecated wrapper for inputy() which was removed in version 3.0.0.
+    Use standard input() with printy formatting instead.
+    """
+    warnings.warn(
+        "inputy() was removed in version 3.0.0 and this compatibility wrapper will be "
+        "removed in version 4.0. Use the standard input() function with printy "
+        "formatting instead. Example: input(raw('[y]Enter name: @'))",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    # Only pass the first positional argument (prompt text) to input()
+    # All other parameters (type, options, render_options, default, condition,
+    # max_digits, max_decimals) are ignored as they're not supported by built-in input()
+    # Apply raw() formatting to maintain backward compatibility with formatted prompts
+    prompt = args[0] if args else ""
+    return input(raw(prompt))
+
+
+inputy = _deprecated_inputy
 
 # Main function to extend print() functionality
 printy = printy_instance.format

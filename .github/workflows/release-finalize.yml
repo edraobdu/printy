@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: write  # Needed to trigger publish workflow
 
     steps:
       - name: Checkout code
